@@ -49,24 +49,36 @@ const UploadProduct = () => {
   }
 
   const handleUploadImage = async(e)=>{
-    const file = e.target.files[0]
+    const files = e.target.files
 
-    if(!file){
-      return 
+    if(!files || files.length === 0){
+      return
     }
+
     setImageLoading(true)
-    const response = await uploadImage(file)
-    const { data : ImageResponse } = response
-    const imageUrl = ImageResponse.data.url 
-
-    setData((preve)=>{
-      return{
-        ...preve,
-        image : [...preve.image,imageUrl]
+    try{
+      const uploadedUrls = []
+      for(let i = 0; i < files.length; i++){
+        const file = files[i]
+        const response = await uploadImage(file)
+        const { data : ImageResponse } = response
+        const imageUrl = ImageResponse.data.url
+        uploadedUrls.push(imageUrl)
       }
-    })
-    setImageLoading(false)
 
+      setData((preve)=>{
+        return{
+          ...preve,
+          image : [...preve.image, ...uploadedUrls]
+        }
+      })
+    }catch(err){
+      console.error(err)
+    }finally{
+      setImageLoading(false)
+      // clear input so same files can be re-selected if needed
+      e.target.value = null
+    }
   }
 
   const handleDeleteImage = async(index)=>{
@@ -200,7 +212,7 @@ const UploadProduct = () => {
                             id='productImage'
                             className='hidden'
                             accept='image/*'
-                            multiple
+                            multiple="true"
                             onChange={handleUploadImage}
                           />
                       </label>

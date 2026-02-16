@@ -62,18 +62,18 @@ const Header = () => {
             !(isSearchPage && isMobile) && (
                 <div className='container mx-auto flex items-center px-2 justify-between'>
                                 {/**logo */}
-                                <div className='h-full'>
+                                <div className='h-full mt-2'>
                                     <Link to={"/"} className='h-full flex justify-center items-center'>
                                         <img 
                                             src={logo}
-                                            width={170}
-                                            height={60}
+                                            width={200}
+                                            height={10}
                                             alt='logo'
                                             className='hidden lg:block'
                                         />
                                         <img 
                                             src={logo}
-                                            width={120}
+                                            width={170}
                                             height={60}
                                             alt='logo'
                                             className='lg:hidden'

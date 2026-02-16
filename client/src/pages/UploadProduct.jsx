@@ -200,6 +200,7 @@ const UploadProduct = () => {
                             id='productImage'
                             className='hidden'
                             accept='image/*'
+                            multiple
                             onChange={handleUploadImage}
                           />
                       </label>

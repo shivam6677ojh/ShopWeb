@@ -54,7 +54,16 @@ const CheckoutPage = () => {
 
   const handleOnlinePayment = async()=>{
     try {
-        toast.loading("Loading...")
+        if (!cartItemsList?.length) {
+          toast.error("Your cart is empty")
+          return
+        }
+        if (!addressList?.length || !addressList[selectAddress]?._id) {
+          toast.error("Please select an address")
+          return
+        }
+
+        const toastId = toast.loading("Redirecting to payment...")
         const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY
         const stripePromise = await loadStripe(stripePublicKey)
        
@@ -70,7 +79,18 @@ const CheckoutPage = () => {
 
         const { data : responseData } = response
 
-        stripePromise.redirectToCheckout({ sessionId : responseData.id })
+        if (!responseData?.id) {
+          toast.dismiss(toastId)
+          toast.error("Unable to start payment session")
+          return
+        }
+
+        const { error } = await stripePromise.redirectToCheckout({ sessionId : responseData.id })
+        if (error) {
+          toast.dismiss(toastId)
+          toast.error(error.message || "Payment redirect failed")
+          return
+        }
         
         if(fetchCartItem){
           fetchCartItem()
@@ -79,6 +99,7 @@ const CheckoutPage = () => {
           fetchOrder()
         }
     } catch (error) {
+        toast.dismiss()
         AxiosToastError(error)
     }
   }
@@ -92,7 +113,7 @@ const CheckoutPage = () => {
             {
               addressList.map((address, index) => {
                 return (
-                  <label htmlFor={"address" + index} className={!address.status && "hidden"}>
+                  <label htmlFor={"address" + index} className={!address.status ? "hidden" : undefined}>
                     <div className='border rounded p-3 flex gap-3 hover:bg-blue-50'>
                       <div>
                         <input id={"address" + index} type='radio' value={index} onChange={(e) => setSelectAddress(e.target.value)} name='address' />

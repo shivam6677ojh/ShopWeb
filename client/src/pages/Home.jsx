@@ -3,8 +3,11 @@ import banner from '../assets/banner.jpg'
 import bannerMobile from '../assets/banner-mobile.jpg'
 import { useSelector } from 'react-redux'
 import { valideURLConvert } from '../utils/valideURLConvert'
-import {Link, useNavigate} from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import CategoryWiseProductDisplay from '../components/CategoryWiseProductDisplay'
+import Testimonials from '../components/Testimonials'
+import { motion } from 'framer-motion'
+import { fadeIn, staggerContainer } from '../utils/motion'
 
 const Home = () => {
   const loadingCategory = useSelector(state => state.product.loadingCategory)
@@ -12,84 +15,151 @@ const Home = () => {
   const subCategoryData = useSelector(state => state.product.allSubCategory)
   const navigate = useNavigate()
 
-  const handleRedirectProductListpage = (id,cat)=>{
-      console.log(id,cat)
-      const subcategory = subCategoryData.find(sub =>{
-        const filterData = sub.category.some(c => {
-          return c._id == id
-        })
-
-        return filterData ? true : null
+  const handleRedirectProductListpage = (id, cat) => {
+    console.log(id, cat)
+    const subcategory = subCategoryData.find(sub => {
+      const filterData = sub.category.some(c => {
+        return c._id == id
       })
-      const url = `/${valideURLConvert(cat)}-${id}/${valideURLConvert(subcategory.name)}-${subcategory._id}`
 
-      navigate(url)
-      console.log(url)
+      return filterData ? true : null
+    })
+    const url = `/${valideURLConvert(cat)}-${id}/${valideURLConvert(subcategory.name)}-${subcategory._id}`
+
+    navigate(url)
+    console.log(url)
   }
 
 
   return (
-   <section className='bg-white'>
-      <div className='container mx-auto'>
-          <div className={`w-full h-full min-h-48 bg-blue-100 rounded ${!banner && "animate-pulse my-2" } `}>
-              <img
-                src={banner}
-                className='w-full h-full hidden lg:block'
-                alt='banner' 
-              />
-              <img
-                src={bannerMobile}
-                className='w-full h-full lg:hidden'
-                alt='banner' 
-              />
-          </div>
+    <motion.section
+      initial="hidden"
+      animate="show"
+      variants={staggerContainer()}
+      className='bg-primary-light dark:bg-primary-dark overflow-hidden'
+    >
+      {/* Hero Section */}
+      <div className='relative w-full h-[80vh] lg:h-[90vh]'>
+        <div className='absolute inset-0 bg-black/40 z-10' />
+        <motion.div
+          initial={{ scale: 1.1 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 10, ease: "linear", repeat: Infinity, repeatType: "mirror" }}
+          className='absolute inset-0 z-0'
+        >
+          <img
+            src={banner}
+            className='w-full h-full hidden lg:block object-cover'
+            alt='banner'
+          />
+          <img
+            src={bannerMobile}
+            className='w-full h-full lg:hidden object-cover'
+            alt='banner'
+          />
+        </motion.div>
+
+        <div className='relative z-20 container mx-auto h-full flex flex-col justify-center px-4 lg:px-12'>
+          <motion.h1
+            variants={fadeIn("up", "spring", 0.5, 1)}
+            className='text-5xl lg:text-7xl font-serif text-white font-bold mb-6 drop-shadow-lg'
+          >
+            Experience <span className='text-luxury-gold inline-block'>Luxury</span> <br />
+            Delivered to You.
+          </motion.h1>
+          <motion.p
+            variants={fadeIn("up", "spring", 0.7, 1)}
+            className='text-gray-200 text-lg lg:text-xl max-w-xl mb-10 font-light'
+          >
+            Discover a curated collection of premium essentials. Quality, elegance, and speed combined in one seamless experience.
+          </motion.p>
+          <motion.button
+            variants={fadeIn("up", "spring", 0.9, 1)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className='w-fit bg-luxury-gold hover:bg-luxury-gold-hover text-white px-10 py-4 rounded-full font-serif text-lg tracking-wide shadow-2xl shadow-luxury-gold/30 transition-all'
+            onClick={() => document.getElementById('shop-category').scrollIntoView({ behavior: 'smooth' })}
+          >
+            Explore Collection
+          </motion.button>
+        </div>
       </div>
-      
-      <div className='container mx-auto px-4 my-2 grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10  gap-2'>
+
+      {/* Category Section */}
+      <div id='shop-category' className='container mx-auto px-4 my-20'>
+        <motion.div variants={fadeIn("up", "tween", 0.2, 1)} className='text-center mb-12'>
+          <h2 className='text-4xl font-serif text-gray-900 dark:text-inventory-cream dark:text-slate-100 mb-3'>Shop by Category</h2>
+          <div className='w-24 h-1 bg-luxury-gold mx-auto rounded-full'></div>
+        </motion.div>
+
+        <div className='grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6'>
           {
             loadingCategory ? (
-              new Array(12).fill(null).map((c,index)=>{
-                return(
-                  <div key={index+"loadingcategory"} className='bg-white rounded p-4 min-h-36 grid gap-2 shadow animate-pulse'>
-                    <div className='bg-blue-100 min-h-24 rounded'></div>
-                    <div className='bg-blue-100 h-8 rounded'></div>
+              new Array(10).fill(null).map((c, index) => {
+                return (
+                  <div key={index + "loadingcategory"} className='bg-white dark:bg-slate-900 rounded-xl p-4 min-h-36 grid gap-2 shadow-sm animate-pulse border border-luxury-gold/10'>
+                    <div className='bg-luxury-gold/10 min-h-20 rounded-lg'></div>
+                    <div className='bg-luxury-gold/10 h-6 rounded'></div>
                   </div>
                 )
               })
             ) : (
-              categoryData.map((cat,index)=>{
-                return(
-                  <div key={cat._id+"displayCategory"} className='w-full h-full' onClick={()=>handleRedirectProductListpage(cat._id,cat.name)}>
-                    <div>
-                        <img 
-                          src={cat.image}
-                          className='w-full h-full object-scale-down'
-                        />
+              categoryData.map((cat, index) => {
+                // Staggered animation for list items 
+                // Note: Ideally extract to separate component for individual item animations
+                return (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    key={cat._id + "displayCategory"}
+                    className='w-full group cursor-pointer'
+                    onClick={() => handleRedirectProductListpage(cat._id, cat.name)}
+                  >
+                    <div className='rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 border border-luxury-gold/10 hover:border-luxury-gold/40 dark:bg-slate-800 bg-white relative aspect-square flex items-center justify-center p-6'>
+                      <div className='absolute inset-0 bg-luxury-gold/0 group-hover:bg-luxury-gold/5 transition-colors duration-500'></div>
+                      <img
+                        src={cat.image}
+                        className='w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 blend-multiply dark:blend-normal'
+                      />
                     </div>
-                  </div>
+                    <p className='text-center mt-4 font-serif text-lg text-gray-800 dark:text-slate-200 group-hover:text-luxury-gold transition-colors'>{cat.name}</p>
+                  </motion.div>
                 )
               })
-              
+
             )
           }
+        </div>
       </div>
 
       {/***display category product */}
-      {
-        categoryData?.map((c,index)=>{
-          return(
-            <CategoryWiseProductDisplay 
-              key={c?._id+"CategorywiseProduct"} 
-              id={c?._id} 
-              name={c?.name}
-            />
-          )
-        })
-      }
+      <div className='mt-20 space-y-20'>
+        {
+          categoryData?.slice(0, 4).map((c, index) => {
+            return (
+              <div key={c?._id + "CategorywiseProduct"} className='container mx-auto px-4'>
+                <div className='flex items-center justify-between mb-8'>
+                  <h3 className='text-3xl font-serif text-gray-900 dark:text-slate-100'>{c?.name}</h3>
+                  <Link to={`/${valideURLConvert(c?.name)}-${c?._id}`} className='text-luxury-gold hover:text-luxury-gold-hover font-medium tracking-wide border-b border-transparent hover:border-luxury-gold transition-all'>View All</Link>
+                </div>
+                <CategoryWiseProductDisplay
+                  id={c?._id}
+                  name={c?.name}
+                />
+              </div>
+            )
+          })
+        }
+      </div>
 
+      {/* Testimonials Section */}
+      <div className='py-20 bg-luxury-gold/5 mt-20'>
+        <Testimonials />
+      </div>
 
-
-   </section>
+    </motion.section>
   )
 }
 

@@ -1,128 +1,139 @@
 import { createBrowserRouter } from "react-router-dom";
+import { lazy, Suspense } from "react";
 import App from "../App";
-import Home from "../pages/Home";
-import SearchPage from "../pages/SearchPage";
-import Login from "../pages/Login";
-import Register from "../pages/Register";
-import ForgotPassword from "../pages/ForgotPassword";
-import OtpVerification from "../pages/OtpVerification";
-import ResetPassword from "../pages/ResetPassword";
-import UserMenuMobile from "../pages/UserMenuMobile";
-import Dashboard from "../layouts/Dashboard";
-import Profile from "../pages/Profile";
-import MyOrders from "../pages/MyOrders";
-import Address from "../pages/Address";
-import CategoryPage from "../pages/CategoryPage";
-import SubCategoryPage from "../pages/SubCategoryPage";
-import UploadProduct from "../pages/UploadProduct";
-import ProductAdmin from "../pages/ProductAdmin";
-import AdminPermision from "../layouts/AdminPermision";
-import ProductListPage from "../pages/ProductListPage";
-import ProductDisplayPage from "../pages/ProductDisplayPage";
-import CartMobile from "../pages/CartMobile";
-import CheckoutPage from "../pages/CheckoutPage";
-import Success from "../pages/Success";
-import Cancel from "../pages/Cancel";
+import Loading from "../components/Loading"; // Assuming you have a Loading component
+
+// Lazy load pages
+const Home = lazy(() => import("../pages/Home"));
+const SearchPage = lazy(() => import("../pages/SearchPage"));
+const Login = lazy(() => import("../pages/Login"));
+const Register = lazy(() => import("../pages/Register"));
+const ForgotPassword = lazy(() => import("../pages/ForgotPassword"));
+const OtpVerification = lazy(() => import("../pages/OtpVerification"));
+const ResetPassword = lazy(() => import("../pages/ResetPassword"));
+const UserMenuMobile = lazy(() => import("../pages/UserMenuMobile"));
+const Dashboard = lazy(() => import("../layouts/Dashboard"));
+const Profile = lazy(() => import("../pages/Profile"));
+const MyOrders = lazy(() => import("../pages/MyOrders"));
+const Address = lazy(() => import("../pages/Address"));
+const CategoryPage = lazy(() => import("../pages/CategoryPage"));
+const SubCategoryPage = lazy(() => import("../pages/SubCategoryPage"));
+const UploadProduct = lazy(() => import("../pages/UploadProduct"));
+const ProductAdmin = lazy(() => import("../pages/ProductAdmin"));
+const AdminPermision = lazy(() => import("../layouts/AdminPermision"));
+const ProductListPage = lazy(() => import("../pages/ProductListPage"));
+const ProductDisplayPage = lazy(() => import("../pages/ProductDisplayPage"));
+const CartMobile = lazy(() => import("../pages/CartMobile"));
+const CheckoutPage = lazy(() => import("../pages/CheckoutPage"));
+const Success = lazy(() => import("../pages/Success"));
+const Cancel = lazy(() => import("../pages/Cancel"));
+
+// Helper to wrap components in Suspense with a fallback
+const SuspenseLayout = ({ children }) => (
+    <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+        {children}
+    </Suspense>
+);
 
 const router = createBrowserRouter([
     {
-        path : "/",
-        element : <App/>,
-        children : [
+        path: "/",
+        element: <App />,
+        children: [
             {
-                path : "",
-                element : <Home/>
+                path: "",
+                element: <SuspenseLayout><Home /></SuspenseLayout>
             },
             {
-                path : "search",
-                element : <SearchPage/>
+                path: "search",
+                element: <SuspenseLayout><SearchPage /></SuspenseLayout>
             },
             {
-                path : 'login',
-                element : <Login/>
+                path: 'login',
+                element: <SuspenseLayout><Login /></SuspenseLayout>
             },
             {
-                path : "register",
-                element : <Register/>
+                path: "register",
+                element: <SuspenseLayout><Register /></SuspenseLayout>
             },
             {
-                path : "forgot-password",
-                element : <ForgotPassword/>
+                path: "forgot-password",
+                element: <SuspenseLayout><ForgotPassword /></SuspenseLayout>
             },
             {
-                path : "verification-otp",
-                element : <OtpVerification/>
+                path: "verification-otp",
+                element: <SuspenseLayout><OtpVerification /></SuspenseLayout>
             },
             {
-                path : "reset-password",
-                element : <ResetPassword/>
+                path: "reset-password",
+                element: <SuspenseLayout><ResetPassword /></SuspenseLayout>
             },
             {
-                path : "user",
-                element : <UserMenuMobile/>
+                path: "user",
+                element: <SuspenseLayout><UserMenuMobile /></SuspenseLayout>
             },
             {
-                path : "dashboard",
-                element : <Dashboard/>,
-                children : [
+                path: "dashboard",
+                element: <SuspenseLayout><Dashboard /></SuspenseLayout>,
+                children: [
                     {
-                        path : "profile",
-                        element : <Profile/>
+                        path: "profile",
+                        element: <SuspenseLayout><Profile /></SuspenseLayout>
                     },
                     {
-                        path : "myorders",
-                        element : <MyOrders/>
+                        path: "myorders",
+                        element: <SuspenseLayout><MyOrders /></SuspenseLayout>
                     },
                     {
-                        path : "address",
-                        element : <Address/>
+                        path: "address",
+                        element: <SuspenseLayout><Address /></SuspenseLayout>
                     },
                     {
-                        path : 'category',
-                        element : <AdminPermision><CategoryPage/></AdminPermision>
+                        path: 'category',
+                        element: <AdminPermision><CategoryPage /></AdminPermision>
                     },
                     {
-                        path : "subcategory",
-                        element : <AdminPermision><SubCategoryPage/></AdminPermision>
+                        path: "subcategory",
+                        element: <AdminPermision><SubCategoryPage /></AdminPermision>
                     },
                     {
-                        path : 'upload-product',
-                        element : <AdminPermision><UploadProduct/></AdminPermision>
+                        path: 'upload-product',
+                        element: <AdminPermision><UploadProduct /></AdminPermision>
                     },
                     {
-                        path : 'product',
-                        element : <AdminPermision><ProductAdmin/></AdminPermision>
+                        path: 'product',
+                        element: <AdminPermision><ProductAdmin /></AdminPermision>
                     }
                 ]
             },
             {
-                path : ":category",
-                children : [
+                path: ":category",
+                children: [
                     {
-                        path : ":subCategory",
-                        element : <ProductListPage/>
+                        path: ":subCategory",
+                        element: <SuspenseLayout><ProductListPage /></SuspenseLayout>
                     }
                 ]
             },
             {
-                path : "product/:product",
-                element : <ProductDisplayPage/>
+                path: "product/:product",
+                element: <SuspenseLayout><ProductDisplayPage /></SuspenseLayout>
             },
             {
-                path : 'cart',
-                element : <CartMobile/>
+                path: 'cart',
+                element: <SuspenseLayout><CartMobile /></SuspenseLayout>
             },
             {
-                path : "checkout",
-                element : <CheckoutPage/>
+                path: "checkout",
+                element: <SuspenseLayout><CheckoutPage /></SuspenseLayout>
             },
             {
-                path : "success",
-                element : <Success/>
+                path: "success",
+                element: <SuspenseLayout><Success /></SuspenseLayout>
             },
             {
-                path : 'cancel',
-                element : <Cancel/>
+                path: 'cancel',
+                element: <SuspenseLayout><Cancel /></SuspenseLayout>
             }
         ]
     }

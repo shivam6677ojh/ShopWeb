@@ -1,29 +1,169 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
+/* @import "@fontsource/playfair-display"; */
+/* @import "@fontsource/inter"; */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-html{
+@layer base {
+    body {
+        @apply bg-primary-light dark:bg-primary-dark text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300;
+    }
+}
+
+html {
     scroll-behavior: smooth;
 }
 
-body{
+body {
     font-family: "Poppins", sans-serif;
-    font-weight: 100;
+    font-weight: 500;
     font-style: normal;
-    @apply bg-blue-50 text-neutral-700 scroll-smooth
+    @apply bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100 scroll-smooth
 }
 
-.scrollbar-none::-webkit-scrollbar{
+.dark {
+    @apply bg-slate-950 text-slate-200
+}
+
+@layer base {
+
+    .dark input,
+    .dark textarea,
+    .dark select {
+        @apply bg-slate-950 text-slate-100 border-white/10;
+    }
+
+    .dark input::placeholder,
+    .dark textarea::placeholder {
+        @apply text-slate-500;
+    }
+}
+
+@layer utilities {
+
+    /* Ensure proper text contrast in light mode */
+    html:not(.dark) .text-gray-200,
+    html:not(.dark) .text-gray-300,
+    html:not(.dark) .text-gray-400,
+    html:not(.dark) .text-gray-500,
+    html:not(.dark) .text-gray-600,
+    html:not(.dark) .text-neutral-300,
+    html:not(.dark) .text-neutral-400,
+    html:not(.dark) .text-neutral-500,
+    html:not(.dark) .text-slate-300,
+    html:not(.dark) .text-slate-400,
+    html:not(.dark) .text-slate-500 {
+        @apply text-gray-900 !important;
+    }
+
+    /* Ensure headings are always dark in light mode */
+    html:not(.dark) h1,
+    html:not(.dark) h2,
+    html:not(.dark) h3,
+    html:not(.dark) h4,
+    html:not(.dark) h5,
+    html:not(.dark) h6 {
+        @apply text-gray-900 !important;
+    }
+
+    .dark .bg-white {
+        @apply bg-slate-900 !important;
+    }
+
+    .dark .bg-blue-50 {
+        @apply bg-slate-950 !important;
+    }
+
+    .dark .text-neutral-600,
+    .dark .text-gray-600 {
+        @apply text-slate-300 !important;
+    }
+
+    .dark .text-gray-700,
+    .dark .text-neutral-700 {
+        @apply text-slate-200 !important;
+    }
+
+    .dark .border,
+    .dark .border-t,
+    .dark .border-b,
+    .dark .border-l,
+    .dark .border-r {
+        @apply border-white/10 !important;
+    }
+
+    /* Product card text color fixes */
+    html:not(.dark) .product-card {
+        color: #111827;
+    }
+
+    html:not(.dark) .product-card * {
+        color: inherit;
+    }
+
+    .dark .product-card {
+        color: #f8fafc;
+    }
+
+    .dark .product-card * {
+        color: inherit;
+    }
+
+    /* Luxury animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .animate-scale-in {
+        animation: scaleIn 0.3s ease-out;
+    }
+
+    /* Smooth transitions for all elements */
+    * {
+        @apply transition-all duration-300;
+    }
+}
+
+.scrollbar-none::-webkit-scrollbar {
     display: none;
 }
 
-.scrollbarCustom::-webkit-scrollbar{
+.scrollbarCustom::-webkit-scrollbar {
     width: 10px;
-    @apply bg-slate-100
+    background-color: #f8f7f3;
 }
-.scrollbarCustom::-webkit-scrollbar-thumb{
-    @apply bg-blue-100 rounded-full
+
+.scrollbarCustom::-webkit-scrollbar-thumb {
+    background-color: rgba(212, 175, 55, 0.5);
+    border-radius: 9999px;
+}
+
+.scrollbarCustom::-webkit-scrollbar-thumb:hover {
+    background-color: #D4AF37;
 }

@@ -31,15 +31,15 @@ const Search = () => {
     }
 
   return (
-    <div className='w-full  min-w-[300px] lg:min-w-[420px] h-11 lg:h-12 rounded-lg border overflow-hidden flex items-center text-neutral-500 bg-slate-50 group focus-within:border-primary-200 '>
+    <div className='w-full min-w-[300px] lg:min-w-[500px] h-12 rounded-full border-2 border-luxury-gold/30 overflow-hidden flex items-center bg-white dark:bg-slate-900 group hover:border-luxury-gold focus-within:border-luxury-gold focus-within:shadow-lg focus-within:shadow-luxury-gold/20 transition-all duration-300'>
         <div>
             {
                 (isMobile && isSearchPage ) ? (
-                    <Link to={"/"} className='flex justify-center items-center h-full p-2 m-1 group-focus-within:text-primary-200 bg-white rounded-full shadow-md'>
+                    <Link to={"/"} className='flex justify-center items-center h-full p-2 m-1 text-luxury-gold hover:bg-luxury-gold/10 rounded-full transition-all'>
                         <FaArrowLeft size={20}/>
                     </Link>
                 ) :(
-                    <button className='flex justify-center items-center h-full p-3 group-focus-within:text-primary-200'>
+                    <button className='flex justify-center items-center h-full px-4 text-luxury-gold group-hover:scale-110 transition-all'>
                         <IoSearch size={22}/>
                     </button>
                 )
@@ -49,17 +49,16 @@ const Search = () => {
             {
                 !isSearchPage ? (
                      //not in search page
-                     <div onClick={redirectToSearchPage} className='w-full h-full flex items-center'>
+                     <div onClick={redirectToSearchPage} className='w-full h-full flex items-center cursor-pointer'>
                         <TypeAnimation
                                 sequence={[
-                                    // Same substring at the start will only be typed out once, initially
                                     'Search "milk"',
-                                    1000, // wait 1s before replacing "Mice" with "Hamsters"
+                                    1000,
                                     'Search "bread"',
                                     1000,
                                     'Search "sugar"',
                                     1000,
-                                    'Search "panner"',
+                                    'Search "cheese"',
                                     1000,
                                     'Search "chocolate"',
                                     1000,
@@ -74,6 +73,7 @@ const Search = () => {
                                 wrapper="span"
                                 speed={50}
                                 repeat={Infinity}
+                                className='text-gray-500 dark:text-slate-500 italic'
                             />
                      </div>
                 ) : (
@@ -81,10 +81,10 @@ const Search = () => {
                     <div className='w-full h-full'>
                         <input
                             type='text'
-                            placeholder='Search for atta dal and more.'
+                            placeholder='Search for products...'
                             autoFocus
                             defaultValue={searchText}
-                            className='bg-transparent w-full h-full outline-none'
+                            className='bg-transparent w-full h-full outline-none text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 px-4'
                             onChange={handleOnChange}
                         />
                     </div>

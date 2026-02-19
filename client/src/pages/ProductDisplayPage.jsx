@@ -3,226 +3,208 @@ import { useParams } from 'react-router-dom'
 import SummaryApi from '../common/SummaryApi'
 import Axios from '../utils/Axios'
 import AxiosToastError from '../utils/AxiosToastError'
-import { FaAngleRight,FaAngleLeft } from "react-icons/fa6";
+import { FaAngleRight, FaAngleLeft, FaTruck, FaLeaf, FaStar, FaHeart, FaRegHeart } from "react-icons/fa6";
+import { FaShieldAlt } from "react-icons/fa";
 import { DisplayPriceInRupees } from '../utils/DisplayPriceInRupees'
 import Divider from '../components/Divider'
-import image1 from '../assets/minute_delivery.png'
-import image2 from '../assets/Best_Prices_Offers.png'
-import image3 from '../assets/Wide_Assortment.png'
 import { pricewithDiscount } from '../utils/PriceWithDiscount'
 import AddToCartButton from '../components/AddToCartButton'
+import RelatedProducts from '../components/RelatedProducts'
+import { motion } from 'framer-motion'
+import { fadeIn } from '../utils/motion'
 
 const ProductDisplayPage = () => {
   const params = useParams()
   let productId = params?.product?.split("-")?.slice(-1)[0]
-  const [data,setData] = useState({
-    name : "",
-    image : []
+  const [data, setData] = useState({
+    name: "",
+    image: []
   })
-  const [image,setImage] = useState(0)
-  const [loading,setLoading] = useState(false)
+  const [image, setImage] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [isWishlisted, setIsWishlisted] = useState(false)
   const imageContainer = useRef()
 
-  const fetchProductDetails = async()=>{
+  const fetchProductDetails = async () => {
     try {
-        const response = await Axios({
-          ...SummaryApi.getProductDetails,
-          data : {
-            productId : productId 
-          }
-        })
-
-        const { data : responseData } = response
-
-        if(responseData.success){
-          setData(responseData.data)
+      const response = await Axios({
+        ...SummaryApi.getProductDetails,
+        data: {
+          productId: productId
         }
+      })
+
+      const { data: responseData } = response
+
+      if (responseData.success) {
+        setData(responseData.data)
+      }
     } catch (error) {
       AxiosToastError(error)
-    }finally{
+    } finally {
       setLoading(false)
     }
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchProductDetails()
-  },[params])
-  
-  const handleScrollRight = ()=>{
+  }, [params])
+
+  const handleScrollRight = () => {
     imageContainer.current.scrollLeft += 100
   }
-  const handleScrollLeft = ()=>{
+  const handleScrollLeft = () => {
     imageContainer.current.scrollLeft -= 100
   }
-  console.log("product data",data)
+
   return (
-    <section className='container mx-auto p-4 grid lg:grid-cols-2 '>
-        <div className=''>
-            <div className='bg-white lg:min-h-[65vh] lg:max-h-[65vh] rounded min-h-56 max-h-56 h-full w-full'>
-                <img
-                    src={data.image[image]}
-                    className='w-full h-full object-scale-down'
-                /> 
-            </div>
-            <div className='flex items-center justify-center gap-3 my-2'>
+    <section className='container mx-auto px-4 lg:px-12 py-12'>
+      <div className='grid lg:grid-cols-2 gap-12 lg:gap-20'>
+        {/* Left: Product Images */}
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+          className='flex flex-col gap-6'
+        >
+          {/* Main Image */}
+          <div className='bg-primary-light dark:bg-slate-800 rounded-2xl overflow-hidden shadow-2xl border border-luxury-gold/10 aspect-square relative group'>
+            <img
+              src={data.image[image]}
+              className='w-full h-full object-contain p-8 group-hover:scale-105 transition-transform duration-500'
+              alt={data.name}
+            />
+            <div className='absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 pointer-events-none' />
+          </div>
+
+          {/* Thumbnails */}
+          <div className='relative'>
+            <div ref={imageContainer} className='flex gap-4 overflow-x-auto scrollbar-none pb-2'>
               {
-                data.image.map((img,index)=>{
-                  return(
-                    <div key={img+index+"point"} className={`bg-slate-200 w-3 h-3 lg:w-5 lg:h-5 rounded-full ${index === image && "bg-slate-300"}`}></div>
+                data.image.map((img, index) => {
+                  return (
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      key={img + index}
+                      onClick={() => setImage(index)}
+                      className={`w-24 h-24 min-w-[6rem] cursor-pointer rounded-xl border-2 overflow-hidden transition-all ${index === image ? 'border-luxury-gold ring-2 ring-luxury-gold/30' : 'border-transparent bg-gray-100 dark:bg-slate-800'}`}
+                    >
+                      <img
+                        src={img}
+                        alt='product thumbnail'
+                        className='w-full h-full object-contain p-2'
+                      />
+                    </motion.div>
                   )
                 })
               }
             </div>
-            <div className='grid relative'>
-                <div ref={imageContainer} className='flex gap-4 z-10 relative w-full overflow-x-auto scrollbar-none'>
-                      {
-                        data.image.map((img,index)=>{
-                          return(
-                            <div className='w-20 h-20 min-h-20 min-w-20 scr cursor-pointer shadow-md' key={img+index}>
-                              <img
-                                  src={img}
-                                  alt='min-product'
-                                  onClick={()=>setImage(index)}
-                                  className='w-full h-full object-scale-down' 
-                              />
-                            </div>
-                          )
-                        })
-                      }
-                </div>
-                <div className='w-full -ml-3 h-full hidden lg:flex justify-between absolute  items-center'>
-                    <button onClick={handleScrollLeft} className='z-10 bg-white relative p-1 rounded-full shadow-lg'>
-                        <FaAngleLeft/>
-                    </button>
-                    <button onClick={handleScrollRight} className='z-10 bg-white relative p-1 rounded-full shadow-lg'>
-                        <FaAngleRight/>
-                    </button>
-                </div>
+          </div>
+        </motion.div>
+
+        {/* Right: Product Details */}
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className='flex flex-col'
+        >
+          {/* Badges */}
+          <div className='flex items-center gap-3 mb-6'>
+            <span className='px-3 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-bold rounded-full uppercase tracking-wider'>
+              In Stock
+            </span>
+            {data.discount && (
+              <span className='px-3 py-1 bg-luxury-gold text-white text-xs font-bold rounded-full uppercase tracking-wider'>
+                {data.discount}% OFF
+              </span>
+            )}
+          </div>
+
+          {/* Title & Rating */}
+          <h1 className='text-4xl lg:text-5xl font-serif font-bold text-gray-900 dark:text-white mb-4 leading-tight'>{data.name}</h1>
+
+          <div className='flex items-center gap-4 mb-8 text-sm'>
+            <div className='flex text-luxury-gold'>
+              {[...Array(5)].map((_, i) => <FaStar key={i} />)}
             </div>
+            <span className='text-gray-500 dark:text-gray-400'>(128 Reviews)</span>
+            <span className='w-1 h-1 bg-gray-300 rounded-full'></span>
+            <span className='text-gray-500 dark:text-gray-400'>{data.unit}</span>
+          </div>
+
+          {/* Price */}
+          <div className='mb-8'>
+            <div className='flex items-baseline gap-4'>
+              <span className='text-4xl font-serif text-luxury-gold font-medium'>
+                {DisplayPriceInRupees(pricewithDiscount(data.price, data.discount))}
+              </span>
+              {data.discount && (
+                <span className='text-xl text-gray-400 line-through decoration-1'>
+                  {DisplayPriceInRupees(data.price)}
+                </span>
+              )}
+            </div>
+            <p className='text-sm text-gray-500 mt-2'>Inclusive of all taxes</p>
+          </div>
+
+          {/* Actions */}
+          <div className='flex gap-4 mb-10'>
+            <div className='flex-1 max-w-xs'>
+              <AddToCartButton data={data} />
+            </div>
+            <button
+              onClick={() => setIsWishlisted(!isWishlisted)}
+              className='p-4 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-400 hover:text-luxury-gold hover:border-luxury-gold transition-all'
+            >
+              {isWishlisted ? <FaHeart className='text-red-500 text-xl' /> : <FaRegHeart className='text-xl' />}
+            </button>
+          </div>
+
+          <Divider />
+
+          {/* Description */}
+          <div className='py-8 space-y-6'>
             <div>
+              <h3 className='text-lg font-serif font-bold text-gray-900 dark:text-white mb-3'>Description</h3>
+              <p className='text-gray-600 dark:text-gray-300 leading-relaxed font-light'>
+                {data.description}
+              </p>
             </div>
 
-            <div className='my-4  hidden lg:grid gap-3 '>
-                <div>
-                    <p className='font-semibold'>Description</p>
-                    <p className='text-base'>{data.description}</p>
+            {/* Features Grid */}
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 py-4'>
+              <div className='flex items-center gap-3 p-4 rounded-lg bg-gray-50 dark:bg-slate-900/50 border border-luxury-gold/10'>
+                <div className='w-10 h-10 rounded-full bg-luxury-gold/10 flex items-center justify-center text-luxury-gold'>
+                  <FaTruck text-lg />
                 </div>
                 <div>
-                    <p className='font-semibold'>Unit</p>
-                    <p className='text-base'>{data.unit}</p>
+                  <p className='font-semibold text-gray-900 dark:text-white text-sm'>Fast Delivery</p>
+                  <p className='text-xs text-gray-500'>Within 24 hours</p>
                 </div>
-                {
-                  data?.more_details && Object.keys(data?.more_details).map((element,index)=>{
-                    return(
-                      <div>
-                          <p className='font-semibold'>{element}</p>
-                          <p className='text-base'>{data?.more_details[element]}</p>
-                      </div>
-                    )
-                  })
-                }
-            </div>
-        </div>
-
-
-        <div className='p-4 lg:pl-7 text-base lg:text-lg'>
-            <p className='bg-green-300 w-fit px-2 rounded-full'>10 Min</p>
-            <h2 className='text-lg font-semibold lg:text-3xl'>{data.name}</h2>  
-            <p className=''>{data.unit}</p> 
-            <Divider/>
-            <div>
-              <p className=''>Price</p> 
-              <div className='flex items-center gap-2 lg:gap-4'>
-                <div className='border border-green-600 px-4 py-2 rounded bg-green-50 w-fit'>
-                    <p className='font-semibold text-lg lg:text-xl'>{DisplayPriceInRupees(pricewithDiscount(data.price,data.discount))}</p>
-                </div>
-                {
-                  data.discount && (
-                    <p className='line-through'>{DisplayPriceInRupees(data.price)}</p>
-                  )
-                }
-                {
-                  data.discount && (
-                    <p className="font-bold text-green-600 lg:text-2xl">{data.discount}% <span className='text-base text-neutral-500'>Discount</span></p>
-                  )
-                }
-                
               </div>
-
-            </div> 
-              
-              {
-                data.stock === 0 ? (
-                  <p className='text-lg text-red-500 my-2'>Out of Stock</p>
-                ) 
-                : (
-                  // <button className='my-4 px-4 py-1 bg-green-600 hover:bg-green-700 text-white rounded'>Add</button>
-                  <div className='my-4'>
-                    <AddToCartButton data={data}/>
-                  </div>
-                )
-              }
-           
-
-            <h2 className='font-semibold'>Why shop from binkeyit? </h2>
-            <div>
-                  <div className='flex  items-center gap-4 my-4'>
-                      <img
-                        src={image1}
-                        alt='superfast delivery'
-                        className='w-20 h-20'
-                      />
-                      <div className='text-sm'>
-                        <div className='font-semibold'>Superfast Delivery</div>
-                        <p>Get your orer delivered to your doorstep at the earliest from dark stores near you.</p>
-                      </div>
-                  </div>
-                  <div className='flex  items-center gap-4 my-4'>
-                      <img
-                        src={image2}
-                        alt='Best prices offers'
-                        className='w-20 h-20'
-                      />
-                      <div className='text-sm'>
-                        <div className='font-semibold'>Best Prices & Offers</div>
-                        <p>Best price destination with offers directly from the nanufacturers.</p>
-                      </div>
-                  </div>
-                  <div className='flex  items-center gap-4 my-4'>
-                      <img
-                        src={image3}
-                        alt='Wide Assortment'
-                        className='w-20 h-20'
-                      />
-                      <div className='text-sm'>
-                        <div className='font-semibold'>Wide Assortment</div>
-                        <p>Choose from 5000+ products across food personal care, household & other categories.</p>
-                      </div>
-                  </div>
-            </div>
-
-            {/****only mobile */}
-            <div className='my-4 grid gap-3 '>
-                <div>
-                    <p className='font-semibold'>Description</p>
-                    <p className='text-base'>{data.description}</p>
+              <div className='flex items-center gap-3 p-4 rounded-lg bg-gray-50 dark:bg-slate-900/50 border border-luxury-gold/10'>
+                <div className='w-10 h-10 rounded-full bg-luxury-gold/10 flex items-center justify-center text-luxury-gold'>
+                  <FaShieldAlt text-lg />
                 </div>
                 <div>
-                    <p className='font-semibold'>Unit</p>
-                    <p className='text-base'>{data.unit}</p>
+                  <p className='font-semibold text-gray-900 dark:text-white text-sm'>Authentic</p>
+                  <p className='text-xs text-gray-500'>100% Original</p>
                 </div>
-                {
-                  data?.more_details && Object.keys(data?.more_details).map((element,index)=>{
-                    return(
-                      <div>
-                          <p className='font-semibold'>{element}</p>
-                          <p className='text-base'>{data?.more_details[element]}</p>
-                      </div>
-                    )
-                  })
-                }
+              </div>
             </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Related Products Section */}
+      <div className='mt-20'>
+        <div className='text-center mb-12'>
+          <h2 className='text-3xl font-serif text-gray-900 dark:text-white mb-2'>You May Also Like</h2>
+          <div className='w-16 h-1 bg-luxury-gold mx-auto rounded-full'></div>
         </div>
+        <RelatedProducts categoryId={data?.category?.[0]} currentProductId={productId} />
+      </div>
     </section>
   )
 }

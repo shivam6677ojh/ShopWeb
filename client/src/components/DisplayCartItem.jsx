@@ -9,123 +9,148 @@ import AddToCartButton from './AddToCartButton'
 import { pricewithDiscount } from '../utils/PriceWithDiscount'
 import imageEmpty from '../assets/empty_cart.webp'
 import toast from 'react-hot-toast'
+import { motion, AnimatePresence } from 'framer-motion'
+import PropTypes from 'prop-types'
 
-const DisplayCartItem = ({close}) => {
-    const { notDiscountTotalPrice, totalPrice ,totalQty} = useGlobalContext()
-    const cartItem  = useSelector(state => state.cartItem.cart)
+const DisplayCartItem = ({ close }) => {
+    const { notDiscountTotalPrice, totalPrice, totalQty } = useGlobalContext()
+    const cartItem = useSelector(state => state.cartItem.cart)
     const user = useSelector(state => state.user)
     const navigate = useNavigate()
 
-    const redirectToCheckoutPage = ()=>{
-        if(user?._id){
+    const redirectToCheckoutPage = () => {
+        if (user?._id) {
             navigate("/checkout")
-            if(close){
+            if (close) {
                 close()
             }
             return
         }
         toast("Please Login")
     }
-  return (
-    <section className='bg-neutral-900 fixed top-0 bottom-0 right-0 left-0 bg-opacity-70 z-50'>
-        <div className='bg-white w-full max-w-sm min-h-screen max-h-screen ml-auto'>
-            <div className='flex items-center p-4 shadow-md gap-3 justify-between'>
-                <h2 className='font-semibold'>Cart</h2>
-                <Link to={"/"} className='lg:hidden'>
-                    <IoClose size={25}/>
-                </Link>
-                <button onClick={close} className='hidden lg:block'>
-                    <IoClose size={25}/>
-                </button>
-            </div>
+    return (
+        <section className='bg-black/50 fixed inset-0 z-50 backdrop-blur-sm'>
+            <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className='bg-white dark:bg-primary-dark w-full max-w-sm min-h-screen max-h-screen ml-auto shadow-2xl flex flex-col'
+            >
+                <div className='flex items-center p-5 shadow-sm gap-3 justify-between border-b border-luxury-gold/10 bg-white dark:bg-primary-dark z-10'>
+                    <h2 className='font-serif font-bold text-xl text-gray-900 dark:text-white'>Shopping Cart ({totalQty})</h2>
+                    <button onClick={close} className='text-gray-400 hover:text-luxury-gold transition-colors p-1 rounded-full hover:bg-luxury-gold/10'>
+                        <IoClose size={24} />
+                    </button>
+                </div>
 
-            <div className='min-h-[75vh] lg:min-h-[80vh] h-full max-h-[calc(100vh-150px)] bg-blue-50 p-2 flex flex-col gap-4'>
-                {/***display items */}
-                {
-                    cartItem[0] ? (
-                        <>
-                            <div className='flex items-center justify-between px-4 py-2 bg-blue-100 text-blue-500 rounded-full'>
-                                    <p>Your total savings</p>
-                                    <p>{DisplayPriceInRupees(notDiscountTotalPrice - totalPrice )}</p>
-                            </div>
-                            <div className='bg-white rounded-lg p-4 grid gap-5 overflow-auto'>
+                <div className='flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-luxury-gold/20 scrollbar-track-transparent'>
+                    {/***display items */}
+                    {
+                        cartItem[0] ? (
+                            <>
+                                <div className='flex items-center justify-between px-4 py-3 bg-luxury-gold/5 text-luxury-gold rounded-xl border border-luxury-gold/20'>
+                                    <p className='font-medium text-sm'>Total Savings</p>
+                                    <p className='font-bold text-lg'>{DisplayPriceInRupees(notDiscountTotalPrice - totalPrice)}</p>
+                                </div>
+
+                                <div className='space-y-4'>
                                     {
                                         cartItem[0] && (
-                                            cartItem.map((item,index)=>{
-                                                return(
-                                                    <div key={item?._id+"cartItemDisplay"} className='flex  w-full gap-4'>
-                                                        <div className='w-16 h-16 min-h-16 min-w-16 bg-red-500 border rounded'>
+                                            cartItem.map((item, index) => {
+                                                return (
+                                                    <div key={item?._id + "cartItemDisplay"} className='flex gap-3 p-3 bg-white dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-700 hover:border-luxury-gold/30 transition-all'>
+                                                        <div className='w-20 h-20 min-h-[5rem] min-w-[5rem] bg-gray-50 dark:bg-slate-900 rounded-lg overflow-hidden p-2'>
                                                             <img
                                                                 src={item?.productId?.image[0]}
-                                                                className='object-scale-down'
+                                                                className='object-contain w-full h-full'
+                                                                alt={item?.productId?.name}
                                                             />
                                                         </div>
-                                                        <div className='w-full max-w-sm text-xs'>
-                                                            <p className='text-xs text-ellipsis line-clamp-2'>{item?.productId?.name}</p>
-                                                            <p className='text-neutral-400'>{item?.productId?.unit}</p>
-                                                            <p className='font-semibold'>{DisplayPriceInRupees(pricewithDiscount(item?.productId?.price,item?.productId?.discount))}</p>
-                                                        </div>
-                                                        <div>
-                                                            <AddToCartButton data={item?.productId}/>
+                                                        <div className='flex-1 min-w-0 flex flex-col justify-between'>
+                                                            <div>
+                                                                <p className='text-sm font-medium text-gray-900 dark:text-white truncate'>{item?.productId?.name}</p>
+                                                                <p className='text-xs text-gray-500 dark:text-gray-400'>{item?.productId?.unit}</p>
+                                                            </div>
+                                                            <div className='flex items-center justify-between mt-2'>
+                                                                <p className='font-serif font-bold text-luxury-gold'>{DisplayPriceInRupees(pricewithDiscount(item?.productId?.price, item?.productId?.discount))}</p>
+                                                                <div className='scale-75 origin-right'>
+                                                                    <AddToCartButton data={item?.productId} />
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 )
                                             })
                                         )
                                     }
+                                </div>
+
+                                <div className='bg-gray-50 dark:bg-slate-800/50 p-4 rounded-xl border border-gray-100 dark:border-slate-700'>
+                                    <h3 className='font-serif font-semibold text-gray-900 dark:text-white mb-3'>Bill Details</h3>
+                                    <div className='space-y-2 text-sm'>
+                                        <div className='flex justify-between text-gray-600 dark:text-gray-400'>
+                                            <p>Subtotal</p>
+                                            <p>{DisplayPriceInRupees(notDiscountTotalPrice)}</p>
+                                        </div>
+                                        <div className='flex justify-between text-gray-600 dark:text-gray-400'>
+                                            <p>Discount</p>
+                                            <p className='text-green-600'>-{DisplayPriceInRupees(notDiscountTotalPrice - totalPrice)}</p>
+                                        </div>
+                                        <div className='flex justify-between text-gray-600 dark:text-gray-400'>
+                                            <p>Delivery</p>
+                                            <p className='text-green-600'>Free</p>
+                                        </div>
+                                        <div className='pt-3 border-t border-gray-200 dark:border-slate-700 mt-2 flex justify-between items-center'>
+                                            <p className='font-bold text-gray-900 dark:text-white'>Total</p>
+                                            <p className='font-bold text-xl text-luxury-gold'>{DisplayPriceInRupees(totalPrice)}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <div className='flex flex-col justify-center items-center h-full text-center p-8'>
+                                <div className='w-40 h-40 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6'>
+                                    <img
+                                        src={imageEmpty}
+                                        className='w-24 h-24 object-contain opacity-50'
+                                        alt="Empty Cart"
+                                    />
+                                </div>
+                                <h3 className='text-xl font-serif font-semibold text-gray-900 dark:text-white mb-2'>Your cart is empty</h3>
+                                <p className='text-gray-500 dark:text-gray-400 mb-8 max-w-[200px]'>Looks like you haven't added anything to your cart yet.</p>
+                                <button onClick={close} className='px-8 py-3 bg-luxury-gold hover:bg-luxury-gold-hover text-white rounded-full font-medium transition-all shadow-lg shadow-luxury-gold/20'>
+                                    Start Shopping
+                                </button>
                             </div>
-                            <div className='bg-white p-4'>
-                                <h3 className='font-semibold'>Bill details</h3>
-                                <div className='flex gap-4 justify-between ml-1'>
-                                    <p>Items total</p>
-                                    <p className='flex items-center gap-2'><span className='line-through text-neutral-400'>{DisplayPriceInRupees(notDiscountTotalPrice)}</span><span>{DisplayPriceInRupees(totalPrice)}</span></p>
-                                </div>
-                                <div className='flex gap-4 justify-between ml-1'>
-                                    <p>Quntity total</p>
-                                    <p className='flex items-center gap-2'>{totalQty} item</p>
-                                </div>
-                                <div className='flex gap-4 justify-between ml-1'>
-                                    <p>Delivery Charge</p>
-                                    <p className='flex items-center gap-2'>Free</p>
-                                </div>
-                                <div className='font-semibold flex items-center justify-between gap-4'>
-                                    <p >Grand total</p>
-                                    <p>{DisplayPriceInRupees(totalPrice)}</p>
-                                </div>
-                            </div>
-                        </>
-                    ) : (
-                        <div className='bg-white flex flex-col justify-center items-center'>
-                            <img
-                                src={imageEmpty}
-                                className='w-full h-full object-scale-down' 
-                            />
-                            <Link onClick={close} to={"/"} className='block bg-green-600 px-4 py-2 text-white rounded'>Shop Now</Link>
+                        )
+                    }
+                </div>
+
+                {
+                    cartItem[0] && (
+                        <div className='p-4 border-t border-gray-100 dark:border-slate-800 bg-white dark:bg-primary-dark'>
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={redirectToCheckoutPage}
+                                className='w-full bg-luxury-gold hover:bg-luxury-gold-hover text-white py-4 rounded-xl flex items-center justify-between px-6 shadow-lg shadow-luxury-gold/20 transition-all font-medium'
+                            >
+                                <span className='font-serif font-bold text-lg'>{DisplayPriceInRupees(totalPrice)}</span>
+                                <span className='flex items-center gap-2'>
+                                    Proceed to Checkout <FaCaretRight />
+                                </span>
+                            </motion.button>
                         </div>
                     )
                 }
-                
-            </div>
+            </motion.div>
+        </section>
+    )
+}
 
-            {
-                cartItem[0] && (
-                    <div className='p-2'>
-                        <div className='bg-green-700 text-neutral-100 px-4 font-bold text-base py-4 static bottom-3 rounded flex items-center gap-4 justify-between'>
-                            <div>
-                                {DisplayPriceInRupees(totalPrice)}
-                            </div>
-                            <button onClick={redirectToCheckoutPage} className='flex items-center gap-1'>
-                                Proceed
-                                <span><FaCaretRight/></span>
-                            </button>
-                        </div>
-                    </div>
-                )
-            }
-            
-        </div>
-    </section>
-  )
+DisplayCartItem.propTypes = {
+    close: PropTypes.func
 }
 
 export default DisplayCartItem

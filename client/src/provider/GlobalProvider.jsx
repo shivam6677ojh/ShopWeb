@@ -20,6 +20,7 @@ const GlobalProvider = ({children}) => {
     const [totalQty,setTotalQty] = useState(0)
     const cartItem = useSelector(state => state.cartItem.cart)
     const user = useSelector(state => state?.user)
+  const [theme, setTheme] = useState("light")
 
     const fetchCartItem = async()=>{
         try {
@@ -137,6 +138,31 @@ const GlobalProvider = ({children}) => {
       fetchAddress()
       fetchOrder()
     },[user])
+
+    useEffect(() => {
+      const storedTheme = localStorage.getItem("theme")
+      if (storedTheme === "light" || storedTheme === "dark") {
+        setTheme(storedTheme)
+        return
+      }
+
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+      setTheme(prefersDark ? "dark" : "light")
+    }, [])
+
+    useEffect(() => {
+      const root = document.documentElement
+      if (theme === "dark") {
+        root.classList.add("dark")
+      } else {
+        root.classList.remove("dark")
+      }
+      localStorage.setItem("theme", theme)
+    }, [theme])
+
+    const toggleTheme = () => {
+      setTheme(prev => (prev === "dark" ? "light" : "dark"))
+    }
     
     return(
         <GlobalContext.Provider value={{
@@ -147,7 +173,9 @@ const GlobalProvider = ({children}) => {
             totalPrice,
             totalQty,
             notDiscountTotalPrice,
-            fetchOrder
+          fetchOrder,
+          theme,
+          toggleTheme
         }}>
             {children}
         </GlobalContext.Provider>

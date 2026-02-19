@@ -11,9 +11,80 @@ html{
 
 body{
     font-family: "Poppins", sans-serif;
-    font-weight: 100;
+    font-weight: 700;
     font-style: normal;
-    @apply bg-blue-50 text-neutral-700 scroll-smooth
+    @apply bg-blue-50 text-gray-900 scroll-smooth
+}
+
+.dark body{
+    @apply bg-slate-950 text-slate-200
+}
+
+@layer base {
+    .dark input,
+    .dark textarea,
+    .dark select {
+        @apply bg-slate-950 text-slate-100 border-white/10;
+    }
+
+    .dark input::placeholder,
+    .dark textarea::placeholder {
+        @apply text-slate-500;
+    }
+}
+
+@layer utilities {
+    html:not(.dark) .text-gray-200,
+    html:not(.dark) .text-gray-300,
+    html:not(.dark) .text-gray-400,
+    html:not(.dark) .text-gray-500,
+    html:not(.dark) .text-gray-600,
+    html:not(.dark) .text-gray-700,
+    html:not(.dark) .text-neutral-300,
+    html:not(.dark) .text-neutral-400,
+    html:not(.dark) .text-neutral-500,
+    html:not(.dark) .text-neutral-600,
+    html:not(.dark) .text-slate-200,
+    html:not(.dark) .text-slate-300,
+    html:not(.dark) .text-slate-400,
+    html:not(.dark) .text-slate-500,
+    html:not(.dark) .text-slate-600 {
+        @apply text-gray-900 !important;
+    }
+
+    .dark .bg-white {
+        @apply bg-slate-900 !important;
+    }
+
+    .dark .bg-blue-50 {
+        @apply bg-slate-950 !important;
+    }
+
+    .dark .text-neutral-600,
+    .dark .text-gray-600 {
+        @apply text-slate-300 !important;
+    }
+
+    .dark .text-gray-700,
+    .dark .text-neutral-700 {
+        @apply text-slate-200 !important;
+    }
+
+    .dark .border,
+    .dark .border-t,
+    .dark .border-b,
+    .dark .border-l,
+    .dark .border-r {
+        @apply border-white/10 !important;
+    }
+
+    html:not(.dark) .product-card {
+        color: #111827;
+    }
+
+    .dark .product-card {
+        color: #f8fafc;
+    }
 }
 
 .scrollbar-none::-webkit-scrollbar{

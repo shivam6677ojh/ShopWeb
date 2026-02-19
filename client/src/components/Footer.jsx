@@ -5,8 +5,8 @@ import { FaLinkedin } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className='border-t'>
-        <div className='container mx-auto p-4 text-center flex flex-col lg:flex-row lg:justify-between gap-2'>
+    <footer className='border-t dark:border-white/10 dark:bg-slate-950'>
+        <div className='container mx-auto p-4 text-center flex flex-col lg:flex-row lg:justify-between gap-2 text-gray-600 dark:text-slate-300'>
             <p>© All Rights Reserved 2026.</p>
 
             <div className='flex items-center gap-4 justify-center text-2xl'>

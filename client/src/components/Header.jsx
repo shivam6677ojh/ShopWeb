@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import logo from '../assets/logo.png'
 import Search from './Search'
 import { Link, useLocation,useNavigate } from 'react-router-dom'
-import { FaRegCircleUser } from "react-icons/fa6";
+import { FaRegCircleUser, FaMoon, FaSun } from "react-icons/fa6";
 import useMobile from '../hooks/useMobile';
 import { BsCart4 } from "react-icons/bs";
 import { useSelector } from 'react-redux';
@@ -22,7 +22,7 @@ const Header = () => {
     const cartItem = useSelector(state => state.cartItem.cart)
     // const [totalPrice,setTotalPrice] = useState(0)
     // const [totalQty,setTotalQty] = useState(0)
-    const { totalPrice, totalQty} = useGlobalContext()
+    const { totalPrice, totalQty, theme, toggleTheme } = useGlobalContext()
     const [openCartSection,setOpenCartSection] = useState(false)
  
     const redirectToLoginPage = ()=>{
@@ -57,7 +57,7 @@ const Header = () => {
     // },[cartItem])
 
   return (
-    <header className='h-24 lg:h-20 lg:shadow-md sticky top-0 z-40 flex flex-col justify-center gap-1 bg-white'>
+    <header className='h-24 lg:h-20 lg:shadow-md sticky top-0 z-40 flex flex-col justify-center gap-1 bg-white dark:bg-slate-950 dark:text-slate-100'>
         {
             !(isSearchPage && isMobile) && (
                 <div className='container mx-auto flex items-center px-2 justify-between'>
@@ -90,12 +90,28 @@ const Header = () => {
                                 {/**login and my cart */}
                                 <div className=''>
                                     {/**user icons display in only mobile version**/}
-                                    <button className='text-neutral-600 lg:hidden' onClick={handleMobileUser}>
-                                        <FaRegCircleUser size={26}/>
-                                    </button>
+                                    <div className='flex items-center gap-2 lg:hidden'>
+                                        <button className='text-neutral-600 dark:text-slate-200' onClick={handleMobileUser}>
+                                            <FaRegCircleUser size={26}/>
+                                        </button>
+                                        <button
+                                            onClick={toggleTheme}
+                                            className='p-2 rounded-full border border-slate-200/40 text-slate-600 dark:text-slate-200 dark:border-white/10'
+                                            aria-label='Toggle theme'
+                                        >
+                                            {theme === "dark" ? <FaSun size={16} /> : <FaMoon size={16} />}
+                                        </button>
+                                    </div>
 
                                       {/**Desktop**/}
-                                    <div className='hidden lg:flex  items-center gap-10'>
+                                    <div className='hidden lg:flex items-center gap-6'>
+                                        <button
+                                            onClick={toggleTheme}
+                                            className='p-2 rounded-full border border-slate-200/60 text-slate-600 hover:text-slate-800 dark:text-slate-200 dark:border-white/10 dark:hover:text-white'
+                                            aria-label='Toggle theme'
+                                        >
+                                            {theme === "dark" ? <FaSun size={18} /> : <FaMoon size={18} />}
+                                        </button>
                                         {
                                             user?._id ? (
                                                 <div className='relative'>
@@ -113,7 +129,7 @@ const Header = () => {
                                                     {
                                                         openUserMenu && (
                                                             <div className='absolute right-0 top-12'>
-                                                                <div className='bg-white rounded p-4 min-w-52 lg:shadow-lg'>
+                                                                <div className='bg-white dark:bg-slate-900 dark:text-slate-100 rounded p-4 min-w-52 lg:shadow-lg'>
                                                                     <UserMenu close={handleCloseUserMenu}/>
                                                                 </div>
                                                             </div>
@@ -125,7 +141,7 @@ const Header = () => {
                                                 <button onClick={redirectToLoginPage} className='text-lg px-2'>Login</button>
                                             )
                                         }
-                                        <button onClick={()=>setOpenCartSection(true)} className='flex items-center gap-2 bg-green-800 hover:bg-green-700 px-3 py-2 rounded text-white'>
+                                        <button onClick={()=>setOpenCartSection(true)} className='flex items-center gap-2 bg-green-800 hover:bg-green-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 px-3 py-2 rounded text-white'>
                                             {/**add to card icons */}
                                             <div className='animate-bounce'>
                                                 <BsCart4 size={26}/>

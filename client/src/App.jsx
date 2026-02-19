@@ -71,7 +71,7 @@ function App() {
   return (
     <GlobalProvider> 
       <Header/>
-      <main className='min-h-[78vh]'>
+        <main className='min-h-[78vh] bg-blue-50 text-gray-700 dark:bg-slate-950 dark:text-slate-100'>
           <Outlet/>
       </main>
       <Footer/>

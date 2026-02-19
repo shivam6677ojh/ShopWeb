@@ -12,6 +12,7 @@ import { valideURLConvert } from '../utils/valideURLConvert'
 const CategoryWiseProductDisplay = ({ id, name }) => {
     const [data, setData] = useState([])
     const [loading, setLoading] = useState(false)
+    const [isPaused, setIsPaused] = useState(false)
     const containerRef = useRef()
     const subCategoryData = useSelector(state => state.product.allSubCategory)
     const loadingCardNumber = new Array(6).fill(null)
@@ -42,6 +43,28 @@ const CategoryWiseProductDisplay = ({ id, name }) => {
         fetchCategoryWiseProduct()
     }, [])
 
+    useEffect(() => {
+        const slider = containerRef.current
+        if (!slider) return
+
+        const intervalId = setInterval(() => {
+            if (isPaused) return
+
+            const maxScrollLeft = slider.scrollWidth - slider.clientWidth
+            if (maxScrollLeft <= 0) return
+
+            const nextScrollLeft = slider.scrollLeft + 260
+            if (nextScrollLeft >= maxScrollLeft - 5) {
+                slider.scrollTo({ left: 0, behavior: 'smooth' })
+                return
+            }
+
+            slider.scrollBy({ left: 260, behavior: 'smooth' })
+        }, 2500)
+
+        return () => clearInterval(intervalId)
+    }, [data.length, isPaused])
+
     const handleScrollRight = () => {
         containerRef.current.scrollLeft += 200
     }
@@ -71,11 +94,18 @@ const CategoryWiseProductDisplay = ({ id, name }) => {
     return (
         <div>
             <div className='container mx-auto p-4 flex items-center justify-between gap-4'>
-                <h3 className='font-semibold text-lg md:text-xl'>{name}</h3>
+                <h3 className='font-semibold  text-lg text-black md:text-xl dark:!text-slate-100'>{name}</h3>
                 <Link  to={redirectURL} className='text-green-600 hover:text-green-400'>See All</Link>
             </div>
             <div className='relative flex items-center '>
-                <div className=' flex gap-4 md:gap-6 lg:gap-8 container mx-auto px-4 overflow-x-scroll scrollbar-none scroll-smooth' ref={containerRef}>
+                <div
+                    className='flex gap-4 md:gap-6 lg:gap-8 container mx-auto px-4 overflow-x-scroll scrollbar-none scroll-smooth'
+                    ref={containerRef}
+                    onMouseEnter={() => setIsPaused(true)}
+                    onMouseLeave={() => setIsPaused(false)}
+                    onTouchStart={() => setIsPaused(true)}
+                    onTouchEnd={() => setIsPaused(false)}
+                >
                     {loading &&
                         loadingCardNumber.map((_, index) => {
                             return (

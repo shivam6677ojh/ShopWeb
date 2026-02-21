@@ -3,7 +3,7 @@ import './App.css'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import toast, { Toaster } from 'react-hot-toast';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import fetchUserDetails from './utils/fetchUserDetails';
 import { setUserDetails } from './store/userSlice';
 import { setAllCategory, setAllSubCategory, setLoadingCategory } from './store/productSlice';
@@ -13,10 +13,12 @@ import SummaryApi from './common/SummaryApi';
 import { handleAddItemCart } from './store/cartProduct'
 // import { FaCartShopping } from "react-icons/fa6";
 import CartMobileLink from './components/CartMobile';
+import Preloader from './components/Preloader';
 
 function App() {
   const dispatch = useDispatch()
   const location = useLocation()
+  const [isLoading, setIsLoading] = useState(true);
 
 
   const fetchUser = async () => {
@@ -61,14 +63,30 @@ function App() {
 
 
   useEffect(() => {
-    fetchUser()
-    fetchCategory()
-    fetchSubCategory()
+    const initApp = async () => {
+      try {
+        await Promise.all([
+          fetchUser(),
+          fetchCategory(),
+          fetchSubCategory()
+        ]);
+      } catch (error) {
+        console.error("Error initializing app:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    initApp();
     // fetchCartItem()
   }, [])
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [location.pathname]);
+
   return (
     <>
+      {isLoading && <Preloader />}
       <Header />
       <main className='min-h-[78vh] bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100'>
         <Outlet />

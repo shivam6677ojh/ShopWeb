@@ -44,27 +44,27 @@ body {
 @layer utilities {
 
     /* Ensure proper text contrast in light mode */
-    html:not(.dark) .text-gray-200,
-    html:not(.dark) .text-gray-300,
-    html:not(.dark) .text-gray-400,
-    html:not(.dark) .text-gray-500,
-    html:not(.dark) .text-gray-600,
-    html:not(.dark) .text-neutral-300,
-    html:not(.dark) .text-neutral-400,
-    html:not(.dark) .text-neutral-500,
-    html:not(.dark) .text-slate-300,
-    html:not(.dark) .text-slate-400,
-    html:not(.dark) .text-slate-500 {
+    html:not(.dark) main .text-gray-200,
+    html:not(.dark) main .text-gray-300,
+    html:not(.dark) main .text-gray-400,
+    html:not(.dark) main .text-gray-500,
+    html:not(.dark) main .text-gray-600,
+    html:not(.dark) main .text-neutral-300,
+    html:not(.dark) main .text-neutral-400,
+    html:not(.dark) main .text-neutral-500,
+    html:not(.dark) main .text-slate-300,
+    html:not(.dark) main .text-slate-400,
+    html:not(.dark) main .text-slate-500 {
         @apply text-gray-900 !important;
     }
 
     /* Ensure headings are always dark in light mode */
-    html:not(.dark) h1,
-    html:not(.dark) h2,
-    html:not(.dark) h3,
-    html:not(.dark) h4,
-    html:not(.dark) h5,
-    html:not(.dark) h6 {
+    html:not(.dark) main h1,
+    html:not(.dark) main h2,
+    html:not(.dark) main h3,
+    html:not(.dark) main h4,
+    html:not(.dark) main h5,
+    html:not(.dark) main h6 {
         @apply text-gray-900 !important;
     }
 
@@ -144,9 +144,56 @@ body {
         animation: scaleIn 0.3s ease-out;
     }
 
+
     /* Smooth transitions for all elements */
     * {
         @apply transition-all duration-300;
+    }
+
+    /* Luxury Hero Backgrounds */
+    .luxury-hero-bg-light {
+        background:
+            /* Subtle Gold Glow */
+            radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
+            /* Soft Cream Gradient */
+            linear-gradient(135deg, #F8F3E8 0%, #FFFFFF 100%);
+        position: relative;
+    }
+
+    .luxury-hero-bg-light::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        /* Subtle Noise Overlay */
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+        opacity: 0.4;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .luxury-hero-bg-dark {
+        background:
+            /* Subtle Gold Accent Glow */
+            radial-gradient(circle at 60% 40%, rgba(212, 175, 55, 0.06) 0%, transparent 50%),
+            /* Deep Charcoal Gradient - Vignette feel via radial/linear combo */
+            radial-gradient(circle at 50% 50%, #1a202c 0%, #0B0C10 100%);
+        position: relative;
+    }
+
+    .luxury-hero-bg-dark::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        /* Vignette overlay */
+        background: radial-gradient(circle at center, transparent 20%, rgba(0, 0, 0, 0.4) 100%);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    /* Ensure content sits above backgrounds */
+    .luxury-hero-content {
+        position: relative;
+        z-index: 10;
     }
 }
 
@@ -166,4 +213,74 @@ body {
 
 .scrollbarCustom::-webkit-scrollbar-thumb:hover {
     background-color: #D4AF37;
+}
+
+/* ===== Premium Scrollbar (Light + Dark Mode) ===== */
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ===== Chrome, Edge, Safari ===== */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Thumb - Light Mode (default) */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    rgba(100, 116, 139, 0.4),
+    rgba(71, 85, 105, 0.6)
+  );
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: all 0.3s ease;
+}
+
+/* Hover */
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(71, 85, 105, 0.8),
+    rgba(51, 65, 85, 1)
+  );
+}
+
+/* ===== Dark Mode Support ===== */
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      rgba(99, 102, 241, 0.6),
+      rgba(79, 70, 229, 0.9)
+    );
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      180deg,
+      rgba(129, 140, 248, 0.8),
+      rgba(99, 102, 241, 1)
+    );
+  }
+}
+
+/* ===== Firefox ===== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(178, 198, 225, 0.6) transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  * {
+    scrollbar-color: rgba(42, 42, 44, 0.9) transparent;
+  }
 }

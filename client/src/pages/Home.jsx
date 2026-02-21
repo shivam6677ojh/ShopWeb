@@ -1,12 +1,13 @@
 import React from 'react'
-import banner from '../assets/banner.jpg'
-import bannerMobile from '../assets/banner-mobile.jpg'
+// banner images removed for CSS background
 import { useSelector } from 'react-redux'
 import { valideURLConvert } from '../utils/valideURLConvert'
 import { Link, useNavigate } from 'react-router-dom'
 import CategoryWiseProductDisplay from '../components/CategoryWiseProductDisplay'
 import Testimonials from '../components/Testimonials'
 import { motion } from 'framer-motion'
+import HeroSlider from '../components/HeroSlider'
+import HeroStrip from '../components/HeroStrip'
 import { fadeIn, staggerContainer } from '../utils/motion'
 
 const Home = () => {
@@ -38,50 +39,43 @@ const Home = () => {
       variants={staggerContainer()}
       className='bg-primary-light dark:bg-primary-dark overflow-hidden'
     >
-      {/* Hero Section */}
-      <div className='relative w-full h-[80vh] lg:h-[90vh]'>
-        <div className='absolute inset-0 bg-black/40 z-10' />
+      {/* Hero Section - split layout: text left, slider right */}
+      <div className='relative w-full h-[95vh]'>
         <motion.div
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 10, ease: "linear", repeat: Infinity, repeatType: "mirror" }}
-          className='absolute inset-0 z-0'
-        >
-          <img
-            src={banner}
-            className='w-full h-full hidden lg:block object-cover'
-            alt='banner'
-          />
-          <img
-            src={bannerMobile}
-            className='w-full h-full lg:hidden object-cover'
-            alt='banner'
-          />
-        </motion.div>
+          className='absolute inset-0 z-0 luxury-hero-bg-light dark:luxury-hero-bg-dark transition-colors duration-1000'
+        />
 
-        <div className='relative z-20 container mx-auto h-full flex flex-col justify-center px-4 lg:px-12'>
-          <motion.h1
-            variants={fadeIn("up", "spring", 0.5, 1)}
-            className='text-5xl lg:text-7xl font-serif text-white font-bold mb-6 drop-shadow-lg'
-          >
-            Experience <span className='text-luxury-gold inline-block'>Luxury</span> <br />
-            Delivered to You.
-          </motion.h1>
-          <motion.p
-            variants={fadeIn("up", "spring", 0.7, 1)}
-            className='text-gray-200 text-lg lg:text-xl max-w-xl mb-10 font-light'
-          >
-            Discover a curated collection of premium essentials. Quality, elegance, and speed combined in one seamless experience.
-          </motion.p>
-          <motion.button
-            variants={fadeIn("up", "spring", 0.9, 1)}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className='w-fit bg-luxury-gold hover:bg-luxury-gold-hover text-white px-10 py-4 rounded-full font-serif text-lg tracking-wide shadow-2xl shadow-luxury-gold/30 transition-all'
-            onClick={() => document.getElementById('shop-category').scrollIntoView({ behavior: 'smooth' })}
-          >
-            Explore Collection
-          </motion.button>
+        <div className='relative z-20 container mx-auto h-full px-4 lg:px-12 flex items-center'>
+          <div className='w-full lg:w-[38%] flex flex-col justify-center py-8'>
+            <motion.h1
+              variants={fadeIn("left", "spring", 0.6, 1)}
+              className='text-5xl lg:text-7xl font-serif text-gray-900 dark:text-white font-bold mb-6'
+            >
+              Experience <span className='text-luxury-gold inline-block'>Luxury</span> <br />
+              Delivered to You.
+            </motion.h1>
+            <motion.p
+              variants={fadeIn("up", "spring", 0.7, 1)}
+              className='text-gray-700 dark:text-gray-300 text-lg lg:text-xl max-w-xl mb-10 font-light'
+            >
+              Discover a curated collection of premium essentials. Quality, elegance, and speed combined in one seamless experience.
+            </motion.p>
+            <motion.button
+              variants={fadeIn("up", "spring", 0.9, 1)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className='w-fit bg-luxury-gold hover:bg-luxury-gold-hover text-white px-10 py-4 rounded-full font-serif text-lg tracking-wide shadow-2xl shadow-luxury-gold/30 transition-all'
+              onClick={() => document.getElementById('shop-category').scrollIntoView({ behavior: 'smooth' })}
+            >
+              Explore Collection
+            </motion.button>
+          </div>
+
+          <div className='hidden lg:block w-[62%] pl-8'>
+            {/* Slider component inserted here */}
+            <HeroSlider />
+            <HeroStrip />
+          </div>
         </div>
       </div>
 

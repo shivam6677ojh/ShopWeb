@@ -1,0 +1,81 @@
+/* Cinematic hero styles, grain, frosted glass, glass arrows, dot capsules */
+:root{
+	--gold-1:#E6B95C;
+	--gold-2:#F2C96E;
+}
+
+/* radial ambient background used in hero container */
+.luxury-hero-bg-light{
+	background: radial-gradient(1200px 600px at 10% 20%, rgba(245,235,220,0.6), rgba(250,248,245,0.95) 25%, rgba(250,248,245,1) 60%);
+}
+.luxury-hero-bg-dark{
+	background: radial-gradient(1200px 600px at 10% 20%, rgba(10,8,6,0.6), rgba(18,18,18,0.95) 25%, rgba(18,18,18,1) 60%);
+}
+
+.holi-particles{
+	position:absolute; inset:0; pointer-events:none; overflow:hidden;
+}
+.holi-particles:before, .holi-particles:after{
+	content:''; position:absolute; width:200%; height:200%; left:-50%; top:-50%; background-image: radial-gradient(circle at 20% 30%, rgba(255,82,147,0.12), transparent 8%), radial-gradient(circle at 70% 40%, rgba(255,179,71,0.12), transparent 8%), radial-gradient(circle at 50% 80%, rgba(147,71,255,0.08), transparent 8%); animation: holiFloat 6s linear infinite alternate;
+}
+
+@keyframes holiFloat{ to { transform: translateY(12px) rotate(3deg) } }
+
+/* glass arrow */
+.glass-arrow{
+	display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:999px; color:#fff; backdrop-filter: blur(6px) saturate(120%); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 30px rgba(0,0,0,0.25); transition: transform .24s ease, box-shadow .24s ease; cursor:pointer;
+}
+.glass-arrow:hover{ transform: translateY(-3px) scale(1.06); box-shadow: 0 20px 50px rgba(6,6,6,0.28), 0 0 26px rgba(230,185,92,0.08) }
+
+/* dot capsule */
+.dot-capsule{ width:46px; height:12px; border-radius:999px; background: rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.06); position:relative; transition: all .45s cubic-bezier(.2,.9,.2,1); }
+.dot-capsule.active{ width:86px; background: linear-gradient(90deg,var(--gold-1),var(--gold-2)); box-shadow: 0 8px 30px rgba(246,200,80,0.15); }
+.dot-capsule.active:after{ content:''; position:absolute; left:6px; right:6px; top:3px; bottom:3px; border-radius:999px; background: rgba(255,255,255,0.06); }
+
+/* optional progress fill inside active dot
+	 animate using transform scaleX from 0 -> 1 when active
+*/
+.dot-capsule .progress{ position:absolute; left:6px; right:6px; top:3px; bottom:3px; transform-origin:left; background: rgba(255,255,255,0.18); border-radius:999px; transform:scaleX(0); }
+.dot-capsule.active .progress{ animation: progressFill 4s linear forwards }
+@keyframes progressFill{ from{ transform:scaleX(0) } to { transform:scaleX(1) } }
+
+/* small grain overlay for premium texture */
+.grain-overlay{ position:absolute; inset:0; pointer-events:none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><filter id="n"><feTurbulence baseFrequency="0.9" numOctaves="1" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.02"/></svg>'); mix-blend-mode:soft-light; }
+
+/* inner shadow helper (small fallback) */
+.shadow-inner{ box-shadow: inset 0 30px 60px rgba(0,0,0,0.35); }
+
+/* small utility blur size */
+.blur-3xl{ filter: blur(48px) }
+
+/* floating animation for slider */
+.floating-anim{ animation: floaty 6s ease-in-out infinite }
+@keyframes floaty{ 0%{ transform: translateY(0) } 50%{ transform: translateY(-8px) } 100%{ transform: translateY(0) } }
+
+/* helper to slightly scale on hover for CTA */
+.hover-scale-up:hover{ transform: translateZ(0) scale(1.03) }
+
+/* ensure progress element scales from left */
+.progress{ transform-origin: left; display:block }
+
+/* small utility for scale 1.06 hover class */
+.hover\:scale-106:hover{ transform: scale(1.06) }
+
+/* Hero horizontal strip scroller */
+.hero-strip{ position:relative; width:100%; height:110px; overflow:hidden; border-radius:16px }
+.strip-track{ display:flex; gap:16px; align-items:center; height:100%; padding:8px 0; transform:translateX(0); animation: scroll-left 18s linear infinite }
+.strip-item{ flex:0 0 220px; height:94px; border-radius:12px; overflow:hidden; box-shadow: 0 8px 30px rgba(6,6,6,0.12) }
+.strip-item img{ width:100%; height:100%; display:block }
+
+@keyframes scroll-left{ 0%{ transform: translateX(0) } 100%{ transform: translateX(-50%) } }
+
+/* faded masks on both ends */
+.strip-mask-left, .strip-mask-right{ position:absolute; top:0; bottom:0; width:120px; pointer-events:none; z-index:10 }
+.strip-mask-left{ left:0; background: linear-gradient(90deg, rgba(250,248,245,1), rgba(250,248,245,0)); }
+.strip-mask-right{ right:0; background: linear-gradient(270deg, rgba(250,248,245,1), rgba(250,248,245,0)); }
+
+/* dark theme adjustments (if using dark background) */
+.dark .strip-mask-left, .dark .strip-mask-right{ background: linear-gradient(90deg, rgba(18,18,18,1), rgba(18,18,18,0)); }
+
+
+

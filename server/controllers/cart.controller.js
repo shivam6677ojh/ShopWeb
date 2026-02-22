@@ -63,8 +63,20 @@ export const getCartItemController = async(request,response)=>{
             userId : userId
         }).populate('productId')
 
+        const invalidItemIds = cartItem
+            .filter(item => !item?.productId || !Number.isFinite(Number(item?.productId?.price)))
+            .map(item => item._id)
+
+        if (invalidItemIds.length) {
+            await CartProductModel.deleteMany({ _id: { $in: invalidItemIds } })
+        }
+
+        const validCartItems = cartItem.filter(
+            item => item?.productId && Number.isFinite(Number(item?.productId?.price))
+        )
+
         return response.json({
-            data : cartItem,
+            data : validCartItems,
             error : false,
             success : true
         })

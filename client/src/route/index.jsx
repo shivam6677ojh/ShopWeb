@@ -20,6 +20,7 @@ const CategoryPage = lazy(() => import("../pages/CategoryPage"));
 const SubCategoryPage = lazy(() => import("../pages/SubCategoryPage"));
 const UploadProduct = lazy(() => import("../pages/UploadProduct"));
 const ProductAdmin = lazy(() => import("../pages/ProductAdmin"));
+const AdminDashboard = lazy(() => import("../pages/AdminDashboard"));
 const AdminPermision = lazy(() => import("../layouts/AdminPermision"));
 const ProductListPage = lazy(() => import("../pages/ProductListPage"));
 const ProductDisplayPage = lazy(() => import("../pages/ProductDisplayPage"));
@@ -103,6 +104,10 @@ const router = createBrowserRouter([
                     {
                         path: 'product',
                         element: <AdminPermision><ProductAdmin /></AdminPermision>
+                    },
+                    {
+                        path: 'admin',
+                        element: <AdminPermision><AdminDashboard /></AdminPermision>
                     }
                 ]
             },

@@ -152,6 +152,10 @@ const SummaryApi = {
     getOrderItems : {
         url : '/api/order/order-list',
         method : 'get'
+    },
+    adminDashboardStats : {
+        url : '/api/admin/dashboard-stats',
+        method : 'get'
     }
 }
 

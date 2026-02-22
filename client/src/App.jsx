@@ -19,6 +19,7 @@ function App() {
   const dispatch = useDispatch()
   const location = useLocation()
   const [isLoading, setIsLoading] = useState(true);
+  const MIN_LOADER_MS = 1500;
 
 
   const fetchUser = async () => {
@@ -55,8 +56,9 @@ function App() {
         dispatch(setAllSubCategory(responseData.data.sort((a, b) => a.name.localeCompare(b.name))))
       }
     } catch (error) {
-
+      console.log(error);
     } finally {
+      dispatch(setLoadingCategory(false))
     }
   }
 
@@ -64,6 +66,7 @@ function App() {
 
   useEffect(() => {
     const initApp = async () => {
+      const startTime = Date.now();
       try {
         await Promise.all([
           fetchUser(),
@@ -73,7 +76,9 @@ function App() {
       } catch (error) {
         console.error("Error initializing app:", error);
       } finally {
-        setIsLoading(false);
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(MIN_LOADER_MS - elapsed, 0);
+        setTimeout(() => setIsLoading(false), remaining);
       }
     };
     initApp();

@@ -2,7 +2,11 @@ import { createContext,useContext, useEffect, useState } from "react";
 import Axios from "../utils/Axios";
 import SummaryApi from "../common/SummaryApi";
 import { useDispatch, useSelector } from "react-redux";
-import { handleAddItemCart } from "../store/cartProduct";
+import {
+  handleAddItemCart,
+  removeCartItemOptimistic,
+  updateCartItemOptimistic
+} from "../store/cartProduct";
 import AxiosToastError from "../utils/AxiosToastError";
 import toast from "react-hot-toast";
 import { pricewithDiscount } from "../utils/PriceWithDiscount";
@@ -40,6 +44,7 @@ const GlobalProvider = ({children}) => {
     }
 
     const updateCartItem = async(id,qty)=>{
+      dispatch(updateCartItemOptimistic({ _id: id, qty }))
       try {
           const response = await Axios({
             ...SummaryApi.updateCartItemQty,
@@ -57,10 +62,12 @@ const GlobalProvider = ({children}) => {
           }
       } catch (error) {
         AxiosToastError(error)
+        fetchCartItem()
         return error
       }
     }
     const deleteCartItem = async(cartId)=>{
+      dispatch(removeCartItemOptimistic({ _id: cartId }))
       try {
           const response = await Axios({
             ...SummaryApi.deleteCartItem,
@@ -76,27 +83,36 @@ const GlobalProvider = ({children}) => {
           }
       } catch (error) {
          AxiosToastError(error)
+         fetchCartItem()
       }
     }
 
-    useEffect(()=>{
-      const qty = cartItem.reduce((preve,curr)=>{
-          return preve + curr.quantity
-      },0)
+    useEffect(() => {
+      const qty = cartItem.reduce((prev, curr) => {
+        const itemQty = Number(curr?.quantity)
+        return prev + (Number.isFinite(itemQty) ? itemQty : 0)
+      }, 0)
       setTotalQty(qty)
-      
-      const tPrice = cartItem.reduce((preve,curr)=>{
-          const priceAfterDiscount = pricewithDiscount(curr?.productId?.price,curr?.productId?.discount)
 
-          return preve + (priceAfterDiscount * curr.quantity)
-      },0)
+      const tPrice = cartItem.reduce((prev, curr) => {
+        const priceAfterDiscount = pricewithDiscount(curr?.productId?.price, curr?.productId?.discount)
+        const itemQty = Number(curr?.quantity)
+        const safeQty = Number.isFinite(itemQty) ? itemQty : 0
+
+        return prev + (priceAfterDiscount * safeQty)
+      }, 0)
       setTotalPrice(tPrice)
 
-      const notDiscountPrice = cartItem.reduce((preve,curr)=>{
-        return preve + (curr?.productId?.price * curr.quantity)
-      },0)
+      const notDiscountPrice = cartItem.reduce((prev, curr) => {
+        const itemPrice = Number(curr?.productId?.price)
+        const itemQty = Number(curr?.quantity)
+        const safePrice = Number.isFinite(itemPrice) ? itemPrice : 0
+        const safeQty = Number.isFinite(itemQty) ? itemQty : 0
+
+        return prev + (safePrice * safeQty)
+      }, 0)
       setNotDiscountTotalPrice(notDiscountPrice)
-  },[cartItem])
+  }, [cartItem])
 
     const handleLogoutOut = ()=>{
         localStorage.clear()

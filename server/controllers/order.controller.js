@@ -4,12 +4,28 @@ import OrderModel from "../models/order.model.js";
 import UserModel from "../models/user.model.js";
 import mongoose from "mongoose";
 
+const calculateDiscountedPrice = (price, dis = 1) => {
+    const numericPrice = Number(price)
+    const numericDiscount = Number(dis)
+
+    if (!Number.isFinite(numericPrice) || !Number.isFinite(numericDiscount)) {
+        return 0
+    }
+
+    const discountAmount = Math.ceil((numericPrice * numericDiscount) / 100)
+    return numericPrice - discountAmount
+}
+
  export async function CashOnDeliveryOrderController(request,response){
     try {
         const userId = request.userId // auth middleware 
         const { list_items, totalAmt, addressId,subTotalAmt } = request.body 
 
         const payload = list_items.map(el => {
+            const itemQty = Number(el.quantity)
+            const safeQty = Number.isFinite(itemQty) ? itemQty : 1
+            const lineTotal = calculateDiscountedPrice(el?.productId?.price, el?.productId?.discount) * safeQty
+
             return({
                 userId : userId,
                 orderId : `ORD-${new mongoose.Types.ObjectId()}`,
@@ -18,11 +34,12 @@ import mongoose from "mongoose";
                     name : el.productId.name,
                     image : el.productId.image
                 } ,
+                quantity : safeQty,
                 paymentId : "",
                 payment_status : "CASH ON DELIVERY",
                 delivery_address : addressId ,
-                subTotalAmt  : subTotalAmt,
-                totalAmt  :  totalAmt,
+                subTotalAmt  : lineTotal,
+                totalAmt  :  lineTotal,
             })
         })
 
@@ -48,7 +65,7 @@ import mongoose from "mongoose";
     }
 }
 
-export const pricewithDiscount = (price,dis = 1)=>{
+ export const pricewithDiscount = (price,dis = 1)=>{
     const discountAmout = Math.ceil((Number(price) * Number(dis)) / 100)
     const actualPrice = Number(price) - Number(discountAmout)
     return actualPrice
@@ -72,7 +89,7 @@ export async function paymentController(request,response){
                             productId : item.productId._id
                         }
                     },
-                    unit_amount : pricewithDiscount(item.productId.price,item.productId.discount) * 100   
+                    unit_amount : calculateDiscountedPrice(item.productId.price,item.productId.discount) * 100
                },
                adjustable_quantity : {
                     enabled : true,
@@ -134,6 +151,7 @@ const getOrderProductItems = async({
                 paymentId : paymentId,
                 payment_status : payment_status,
                 delivery_address : addressId,
+                quantity : item.quantity,
                 subTotalAmt  : Number(item.amount_total / 100),
                 totalAmt  :  Number(item.amount_total / 100),
             }

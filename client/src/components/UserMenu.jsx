@@ -56,6 +56,12 @@ const UserMenu = ({close}) => {
         <div className='text-sm grid gap-1 text-gray-700 dark:text-slate-200'>
             {
               isAdmin(user.role) && (
+                <Link onClick={handleClose} to={"/dashboard/admin"} className='px-2 hover:bg-orange-200 dark:hover:bg-white/10 py-1'>Admin Dashboard</Link>
+              )
+            }
+
+            {
+              isAdmin(user.role) && (
                 <Link onClick={handleClose} to={"/dashboard/category"} className='px-2 hover:bg-orange-200 dark:hover:bg-white/10 py-1'>Category</Link>
               )
             }

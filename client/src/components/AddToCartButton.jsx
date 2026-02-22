@@ -5,7 +5,8 @@ import SummaryApi from '../common/SummaryApi'
 import toast from 'react-hot-toast'
 import AxiosToastError from '../utils/AxiosToastError'
 import Loading from './Loading'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { addCartItemOptimistic } from '../store/cartProduct'
 import { FaMinus, FaPlus } from "react-icons/fa6";
 import { motion } from 'framer-motion';
 
@@ -13,6 +14,7 @@ const AddToCartButton = ({ data }) => {
     const { fetchCartItem, updateCartItem, deleteCartItem } = useGlobalContext()
     const [loading, setLoading] = useState(false)
     const cartItem = useSelector(state => state.cartItem.cart)
+    const dispatch = useDispatch()
     const [isAvailableCart, setIsAvailableCart] = useState(false)
     const [qty, setQty] = useState(0)
     const [cartItemDetails, setCartItemsDetails] = useState()
@@ -20,6 +22,10 @@ const AddToCartButton = ({ data }) => {
     const handleADDTocart = async (e) => {
         e.preventDefault()
         e.stopPropagation()
+
+        if (data?._id) {
+            dispatch(addCartItemOptimistic({ product: data, quantity: 1 }))
+        }
 
         try {
             setLoading(true)
@@ -41,6 +47,9 @@ const AddToCartButton = ({ data }) => {
             }
         } catch (error) {
             AxiosToastError(error)
+            if (fetchCartItem) {
+                fetchCartItem()
+            }
         } finally {
             setLoading(false)
         }

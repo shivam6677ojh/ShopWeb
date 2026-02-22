@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import CardLoading from '../components/CardLoading'
 import SummaryApi from '../common/SummaryApi'
 import Axios from '../utils/Axios'
@@ -15,10 +15,20 @@ const SearchPage = () => {
   const [page,setPage] = useState(1)
   const [totalPage,setTotalPage] = useState(1)
   const params = useLocation()
-  const searchText = params?.search?.slice(3)
+  const searchText = useMemo(() => {
+    const query = new URLSearchParams(params.search)
+    return query.get("q") || ""
+  }, [params.search])
 
   const fetchData = async() => {
     try {
+      if (!searchText.trim()) {
+        setData([])
+        setTotalPage(1)
+        setLoading(false)
+        return
+      }
+
       setLoading(true)
         const response = await Axios({
             ...SummaryApi.searchProduct,
@@ -50,6 +60,10 @@ const SearchPage = () => {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    setPage(1)
+  }, [searchText])
 
   useEffect(()=>{
     fetchData()

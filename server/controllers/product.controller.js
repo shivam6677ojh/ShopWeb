@@ -269,14 +269,11 @@ export const searchProduct = async(request,response)=>{
     try {
         let { search, page , limit } = request.body 
 
-        if(!page){
-            page = 1
-        }
-        if(!limit){
-            limit  = 10
-        }
+        page = Number(page) || 1
+        limit = Number(limit) || 10
 
-        const query = search ? {
+        const useTextQuery = Boolean(search && String(search).trim())
+        const textQuery = useTextQuery ? {
             $text : {
                 $search : search
             }
@@ -284,10 +281,34 @@ export const searchProduct = async(request,response)=>{
 
         const skip = ( page - 1) * limit
 
-        const [data,dataCount] = await Promise.all([
-            ProductModel.find(query).sort({ createdAt  : -1 }).skip(skip).limit(limit).populate('category subCategory'),
-            ProductModel.countDocuments(query)
-        ])
+        let data = []
+        let dataCount = 0
+
+        try {
+            [data, dataCount] = await Promise.all([
+                ProductModel.find(textQuery).sort({ createdAt  : -1 }).skip(skip).limit(limit).populate('category subCategory'),
+                ProductModel.countDocuments(textQuery)
+            ])
+        } catch (innerError) {
+            const message = String(innerError?.message || "")
+            const isTextIndexMissing = message.includes("text index required") || innerError?.code === 27
+
+            if (!useTextQuery || !isTextIndexMissing) {
+                throw innerError
+            }
+
+            const regexQuery = {
+                $or: [
+                    { name: { $regex: search, $options: "i" } },
+                    { description: { $regex: search, $options: "i" } }
+                ]
+            }
+
+            ;[data, dataCount] = await Promise.all([
+                ProductModel.find(regexQuery).sort({ createdAt  : -1 }).skip(skip).limit(limit).populate('category subCategory'),
+                ProductModel.countDocuments(regexQuery)
+            ])
+        }
 
         return response.json({
             message : "Product data",

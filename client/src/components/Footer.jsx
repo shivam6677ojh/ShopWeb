@@ -89,7 +89,7 @@ const Footer = () => {
         </div>
       </div>
       <div className='border-t border-white/5 py-8 text-center text-sm text-gray-600'>
-        © 2024 ShopWeb. All rights reserved. Designed for excellence.
+        © 2026 ShopWeb. All rights reserved. Designed for excellence.
       </div>
     </footer>
   )

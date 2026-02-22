@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import ProductModel from "../models/product.model.js";
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -11,6 +12,7 @@ if(!process.env.MONGODB_URI){
 async function connectDB(){
     try {
         await mongoose.connect(process.env.MONGODB_URI)
+        await ProductModel.syncIndexes()
         console.log("connect DB")
     } catch (error) {
         console.log("Mongodb connect error",error)

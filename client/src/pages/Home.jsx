@@ -134,10 +134,10 @@ const Home = () => {
           categoryData?.slice(0, 4).map((c, index) => {
             return (
               <div key={c?._id + "CategorywiseProduct"} className='container mx-auto px-4'>
-                {/* <div className='flex items-center justify-between mb-8'>
+                <div className='flex items-center justify-between mb-8'>
                   <h3 className='text-3xl font-serif text-gray-900 dark:text-slate-100'>{c?.name}</h3>
                   <Link to={`/${valideURLConvert(c?.name)}-${c?._id}`} className='text-luxury-gold hover:text-luxury-gold-hover font-medium tracking-wide border-b border-transparent hover:border-luxury-gold transition-all'>View All</Link>
-                </div> */}
+                </div>
                 <CategoryWiseProductDisplay
                   id={c?._id}
                   name={c?.name}

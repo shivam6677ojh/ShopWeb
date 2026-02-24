@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import App from "../App";
 import Loading from "../components/Loading"; // Assuming you have a Loading component
@@ -21,6 +21,7 @@ const SubCategoryPage = lazy(() => import("../pages/SubCategoryPage"));
 const UploadProduct = lazy(() => import("../pages/UploadProduct"));
 const ProductAdmin = lazy(() => import("../pages/ProductAdmin"));
 const AdminDashboard = lazy(() => import("../pages/AdminDashboard"));
+const AdminDeliveryAgents = lazy(() => import("../pages/AdminDeliveryAgents"));
 const AdminPermision = lazy(() => import("../layouts/AdminPermision"));
 const ProductListPage = lazy(() => import("../pages/ProductListPage"));
 const ProductDisplayPage = lazy(() => import("../pages/ProductDisplayPage"));
@@ -28,6 +29,9 @@ const CartMobile = lazy(() => import("../pages/CartMobile"));
 const CheckoutPage = lazy(() => import("../pages/CheckoutPage"));
 const Success = lazy(() => import("../pages/Success"));
 const Cancel = lazy(() => import("../pages/Cancel"));
+const AgentLogin = lazy(() => import("../pages/AgentLogin"));
+const AgentDashboard = lazy(() => import("../pages/AgentDashboard"));
+const AgentShell = lazy(() => import("../layouts/AgentShell"));
 
 // Helper to wrap components in Suspense with a fallback
 const SuspenseLayout = ({ children }) => (
@@ -108,6 +112,10 @@ const router = createBrowserRouter([
                     {
                         path: 'admin',
                         element: <AdminPermision><AdminDashboard /></AdminPermision>
+                    },
+                    {
+                        path: 'delivery-agents',
+                        element: <AdminPermision><AdminDeliveryAgents /></AdminPermision>
                     }
                 ]
             },
@@ -139,6 +147,24 @@ const router = createBrowserRouter([
             {
                 path: 'cancel',
                 element: <SuspenseLayout><Cancel /></SuspenseLayout>
+            }
+        ]
+    },
+    {
+        path: "/agent/login",
+        element: <SuspenseLayout><AgentLogin /></SuspenseLayout>
+    },
+    {
+        path: "/agent",
+        element: <SuspenseLayout><AgentShell /></SuspenseLayout>,
+        children: [
+            {
+                index: true,
+                element: <Navigate to="dashboard" replace />
+            },
+            {
+                path: "dashboard",
+                element: <SuspenseLayout><AgentDashboard /></SuspenseLayout>
             }
         ]
     }

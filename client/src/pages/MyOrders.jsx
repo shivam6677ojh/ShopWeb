@@ -130,7 +130,9 @@ const MyOrders = () => {
             const paymentStatus = order?.payment_status || "Payment Pending"
             const orderStatus = order?.order_status || "PLACED"
             const isCancelled = orderStatus === "CANCELLED"
+            const isDelivered = orderStatus === "DELIVERED"
             const isActionLoading = actionLoadingId === order?._id
+            const deliveryHistory = Array.isArray(order?.delivery_status_history) ? order.delivery_status_history : []
 
             return (
               <div key={order?._id + index + "order"} className='rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-slate-900 p-4 shadow-sm'>
@@ -161,8 +163,8 @@ const MyOrders = () => {
                       <span className='px-2 py-1 rounded-full bg-green-100 text-green-700'>
                         {paymentStatus}
                       </span>
-                      <span className={`px-2 py-1 rounded-full ${isCancelled ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>
-                        {orderStatus}
+                      <span className={`px-2 py-1 rounded-full ${isCancelled ? 'bg-red-100 text-red-700' : isDelivered ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
+                        {isDelivered ? "DELIVERED" : orderStatus}
                       </span>
                       <span className='px-2 py-1 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'>
                         Qty: {order?.quantity || 1}
@@ -173,7 +175,7 @@ const MyOrders = () => {
                     </div>
                   </div>
                   <div className='flex flex-wrap gap-2'>
-                    {!isCancelled ? (
+                    {!isCancelled && !isDelivered ? (
                       <button
                         onClick={()=>setConfirmAction({ type : "cancel", orderId : order?._id })}
                         disabled={isActionLoading}
@@ -181,7 +183,7 @@ const MyOrders = () => {
                       >
                         {isActionLoading ? "Cancelling..." : "Cancel Order"}
                       </button>
-                    ) : (
+                    ) : isCancelled ? (
                       <button
                         onClick={()=>setConfirmAction({ type : "delete", orderId : order?._id })}
                         disabled={isActionLoading}
@@ -189,9 +191,24 @@ const MyOrders = () => {
                       >
                         {isActionLoading ? "Deleting..." : "Delete"}
                       </button>
+                    ) : (
+                      <span className='px-3 py-2 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700'>Completed</span>
                     )}
                   </div>
                 </div>
+
+                {deliveryHistory.length > 0 && (
+                  <div className='mt-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 px-3 py-2 text-xs text-slate-600 dark:text-slate-300'>
+                    <p className='text-[10px] uppercase tracking-[0.25em] text-slate-400 mb-2'>Delivery Updates</p>
+                    <div className='flex flex-wrap gap-2'>
+                      {deliveryHistory.slice().reverse().map((entry, idx) => (
+                        <span key={`${order._id}-status-${idx}`} className='px-2 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10'>
+                          {entry?.status || "UPDATE"} {entry?.at ? `• ${new Date(entry.at).toLocaleString()}` : ""}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )
           })}

@@ -26,7 +26,8 @@ const UserMenu = ({close}) => {
               close()
             }
             dispatch(logout())
-            localStorage.clear()
+            localStorage.removeItem("accesstoken")
+            localStorage.removeItem("refreshToken")
             toast.success(response.data.message)
             navigate("/")
           }
@@ -81,6 +82,12 @@ const UserMenu = ({close}) => {
             {
               isAdmin(user.role) && (
                 <Link onClick={handleClose} to={"/dashboard/product"} className='px-2 hover:bg-orange-200 dark:hover:bg-white/10 py-1'>Product</Link>
+              )
+            }
+
+            {
+              isAdmin(user.role) && (
+                <Link onClick={handleClose} to={"/dashboard/delivery-agents"} className='px-2 hover:bg-orange-200 dark:hover:bg-white/10 py-1'>Delivery Agents</Link>
               )
             }
 

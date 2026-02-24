@@ -2,6 +2,7 @@ import Stripe from "../config/stripe.js";
 import CartProductModel from "../models/cartproduct.model.js";
 import OrderModel from "../models/order.model.js";
 import UserModel from "../models/user.model.js";
+import DeliveryAgentModel from "../models/deliveryAgent.model.js";
 import mongoose from "mongoose";
 
 const calculateDiscountedPrice = (price, dis = 1) => {
@@ -109,7 +110,7 @@ export async function paymentController(request,response){
                 addressId : addressId
             },
             line_items : line_items,
-            success_url : `${process.env.FRONTEND_URL}/success`,
+            success_url : `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url : `${process.env.FRONTEND_URL}/cancel`
         }
 
@@ -165,10 +166,15 @@ const getOrderProductItems = async({
 
 //http://localhost:8080/api/order/webhook
 export async function webhookStripe(request,response){
-    const event = request.body;
     const endPointSecret = process.env.STRIPE_ENPOINT_WEBHOOK_SECRET_KEY
+    const signature = request.headers["stripe-signature"]
+    let event = request.body
 
-    console.log("event",event)
+    if (endPointSecret && signature) {
+        event = Stripe.webhooks.constructEvent(request.body, signature, endPointSecret)
+    } else if (Buffer.isBuffer(request.body)) {
+        event = JSON.parse(request.body.toString())
+    }
 
     // Handle the event
   switch (event.type) {
@@ -201,6 +207,75 @@ export async function webhookStripe(request,response){
 
   // Return a response to acknowledge receipt of the event
   response.json({received: true});
+}
+
+export async function confirmStripeSessionController(request, response) {
+    try {
+        const userId = request.userId
+        const { sessionId } = request.body || {}
+
+        if (!sessionId) {
+            return response.status(400).json({
+                message: "Provide sessionId",
+                error: true,
+                success: false
+            })
+        }
+
+        const session = await Stripe.checkout.sessions.retrieve(sessionId)
+
+        if (!session || session.payment_status !== "paid") {
+            return response.status(400).json({
+                message: "Payment not completed",
+                error: true,
+                success: false
+            })
+        }
+
+        const paymentId = session.payment_intent
+        const existing = await OrderModel.findOne({ paymentId })
+
+        if (existing) {
+            return response.json({
+                message: "Order already confirmed",
+                error: false,
+                success: true,
+                data: existing
+            })
+        }
+
+        const lineItems = await Stripe.checkout.sessions.listLineItems(session.id)
+        const addressId = session.metadata?.addressId
+        const sessionUserId = session.metadata?.userId || userId
+
+        const orderProduct = await getOrderProductItems({
+            lineItems,
+            userId: sessionUserId,
+            addressId,
+            paymentId,
+            payment_status: session.payment_status
+        })
+
+        const order = await OrderModel.insertMany(orderProduct)
+
+        if (Boolean(order[0])) {
+            await UserModel.findByIdAndUpdate(sessionUserId, { shopping_cart: [] })
+            await CartProductModel.deleteMany({ userId: sessionUserId })
+        }
+
+        return response.json({
+            message: "Order confirmed",
+            error: false,
+            success: true,
+            data: order
+        })
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        })
+    }
 }
 
 
@@ -314,5 +389,317 @@ export async function deleteOrderController(request, response) {
             error: true,
             success: false
         })
+    }
+}
+
+export async function assignOrderToAgentController(request, response) {
+    try {
+        const { orderId, agentId } = request.body;
+
+        if (!orderId || !agentId) {
+            return response.status(400).json({
+                message: "Provide orderId and agentId",
+                error: true,
+                success: false
+            });
+        }
+
+        const agent = await DeliveryAgentModel.findById(agentId);
+
+        if (!agent || agent.status !== "Active") {
+            return response.status(400).json({
+                message: "Delivery agent not active",
+                error: true,
+                success: false
+            });
+        }
+
+        const order = await OrderModel.findById(orderId);
+
+        if (!order) {
+            return response.status(404).json({
+                message: "Order not found",
+                error: true,
+                success: false
+            });
+        }
+
+        if (order.order_status !== "PLACED") {
+            return response.status(400).json({
+                message: "Order cannot be assigned",
+                error: true,
+                success: false
+            });
+        }
+
+        order.delivery_agent = agentId;
+        order.order_status = "ASSIGNED";
+        order.assigned_at = new Date();
+        order.agent_response = "PENDING";
+        order.declined_reason = "";
+        order.declined_at = null;
+        order.delivery_status_history.push({
+            status: "ASSIGNED",
+            at: new Date(),
+            note: "Assigned to delivery agent",
+            by: agentId
+        });
+
+        await order.save();
+
+        return response.json({
+            message: "Order assigned",
+            error: false,
+            success: true,
+            data: order
+        });
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
+}
+
+export async function respondAgentAssignmentController(request, response) {
+    try {
+        const agentId = request.agentId;
+        const { id } = request.params;
+        const { decision, note } = request.body || {};
+
+        if (!decision || !["ACCEPT", "DECLINE"].includes(decision)) {
+            return response.status(400).json({
+                message: "Decision must be ACCEPT or DECLINE",
+                error: true,
+                success: false
+            });
+        }
+
+        const order = await OrderModel.findOne({ _id: id, delivery_agent: agentId });
+
+        if (!order) {
+            return response.status(404).json({
+                message: "Order not found",
+                error: true,
+                success: false
+            });
+        }
+
+        if (order.order_status !== "ASSIGNED") {
+            return response.status(400).json({
+                message: "Only assigned orders can be responded to",
+                error: true,
+                success: false
+            });
+        }
+
+        if (decision === "ACCEPT") {
+            order.agent_response = "ACCEPTED";
+            order.delivery_status_history.push({
+                status: "ACCEPTED",
+                at: new Date(),
+                note: note || "",
+                by: agentId
+            });
+        }
+
+        if (decision === "DECLINE") {
+            order.agent_response = "DECLINED";
+            order.declined_reason = note || "";
+            order.declined_at = new Date();
+            order.delivery_status_history.push({
+                status: "DECLINED",
+                at: new Date(),
+                note: note || "",
+                by: agentId
+            });
+            order.delivery_agent = null;
+            order.order_status = "PLACED";
+            order.assigned_at = null;
+            order.picked_up_at = null;
+            order.out_for_delivery_at = null;
+            order.delivered_at = null;
+        }
+
+        await order.save();
+
+        return response.json({
+            message: "Agent response recorded",
+            error: false,
+            success: true,
+            data: order
+        });
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
+}
+
+export async function getAgentOrdersController(request, response) {
+    try {
+        const agentId = request.agentId;
+        const { status } = request.query;
+
+        const query = {
+            delivery_agent: agentId
+        };
+
+        if (status) {
+            query.order_status = status;
+        } else {
+            query.order_status = {
+                $in: ["ASSIGNED", "PICKED_UP", "OUT_FOR_DELIVERY", "DELIVERED"]
+            };
+        }
+
+        query.agent_response = { $ne: "DECLINED" };
+
+        const orders = await OrderModel.find(query)
+            .sort({ createdAt: -1 })
+            .populate("delivery_address")
+            .populate("userId", "name email mobile");
+
+        return response.json({
+            message: "Agent orders",
+            error: false,
+            success: true,
+            data: orders
+        });
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
+}
+
+export async function updateAgentOrderStatusController(request, response) {
+    try {
+        const agentId = request.agentId;
+        const { id } = request.params;
+        const { status, note } = request.body || {};
+
+        const allowedStatuses = ["ASSIGNED", "PICKED_UP", "OUT_FOR_DELIVERY", "DELIVERED"];
+        const statusFlow = {
+            ASSIGNED: "PICKED_UP",
+            PICKED_UP: "OUT_FOR_DELIVERY",
+            OUT_FOR_DELIVERY: "DELIVERED"
+        };
+
+        if (!status || !allowedStatuses.includes(status)) {
+            return response.status(400).json({
+                message: "Invalid status",
+                error: true,
+                success: false
+            });
+        }
+
+        const order = await OrderModel.findOne({ _id: id, delivery_agent: agentId });
+
+        if (!order) {
+            return response.status(404).json({
+                message: "Order not found",
+                error: true,
+                success: false
+            });
+        }
+
+        if (order.order_status === "CANCELLED") {
+            return response.status(400).json({
+                message: "Cancelled order cannot be updated",
+                error: true,
+                success: false
+            });
+        }
+
+        if (order.order_status === "DELIVERED") {
+            return response.status(400).json({
+                message: "Delivered order cannot be updated",
+                error: true,
+                success: false
+            });
+        }
+
+        const nextStatus = statusFlow[order.order_status];
+
+        if (nextStatus !== status) {
+            return response.status(400).json({
+                message: `Next valid status is ${nextStatus}`,
+                error: true,
+                success: false
+            });
+        }
+
+        order.order_status = status;
+
+        if (status === "PICKED_UP") {
+            order.picked_up_at = new Date();
+        }
+        if (status === "OUT_FOR_DELIVERY") {
+            order.out_for_delivery_at = new Date();
+        }
+        if (status === "DELIVERED") {
+            order.delivered_at = new Date();
+        }
+
+        order.delivery_status_history.push({
+            status,
+            at: new Date(),
+            note: note || "",
+            by: agentId
+        });
+
+        await order.save();
+
+        return response.json({
+            message: "Order status updated",
+            error: false,
+            success: true,
+            data: order
+        });
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
+}
+
+export async function getAdminOrdersController(request, response) {
+    try {
+        const { status, unassigned } = request.query;
+        const query = {};
+
+        if (status) {
+            query.order_status = status;
+        }
+
+        if (unassigned === "true") {
+            query.delivery_agent = null;
+        }
+
+        const orders = await OrderModel.find(query)
+            .sort({ createdAt: -1 })
+            .populate("delivery_address")
+            .populate("userId", "name email mobile");
+
+        return response.json({
+            message: "Admin orders",
+            error: false,
+            success: true,
+            data: orders
+        });
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
     }
 }

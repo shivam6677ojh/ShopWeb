@@ -149,6 +149,10 @@ const SummaryApi = {
         url : "/api/order/checkout",
         method : 'post'
     },
+    confirmStripeSession : {
+        url : "/api/order/confirm-session",
+        method : 'post'
+    },
     getOrderItems : {
         url : '/api/order/order-list',
         method : 'get'
@@ -164,6 +168,42 @@ const SummaryApi = {
     adminDashboardStats : {
         url : '/api/admin/dashboard-stats',
         method : 'get'
+    },
+    agentLogin : {
+        url : '/api/agent/login',
+        method : 'post'
+    },
+    agentCreate : {
+        url : '/api/agent/create',
+        method : 'post'
+    },
+    agentList : {
+        url : '/api/agent/list',
+        method : 'get'
+    },
+    adminOrders : {
+        url : '/api/order/admin/orders',
+        method : 'get'
+    },
+    assignOrder : {
+        url : '/api/order/assign',
+        method : 'post'
+    },
+    agentMe : {
+        url : '/api/agent/me',
+        method : 'get'
+    },
+    agentOrders : {
+        url : '/api/order/agent-orders',
+        method : 'get'
+    },
+    agentUpdateOrderStatus : {
+        url : '/api/order/agent/update-status',
+        method : 'put'
+    },
+    agentRespondOrder : {
+        url : '/api/order/agent/respond',
+        method : 'put'
     }
 }
 

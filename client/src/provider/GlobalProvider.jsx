@@ -115,8 +115,9 @@ const GlobalProvider = ({children}) => {
   }, [cartItem])
 
     const handleLogoutOut = ()=>{
-        localStorage.clear()
-        dispatch(handleAddItemCart([]))
+      localStorage.removeItem("accesstoken")
+      localStorage.removeItem("refreshToken")
+      dispatch(handleAddItemCart([]))
     }
 
     const fetchAddress = async()=>{
@@ -149,8 +150,12 @@ const GlobalProvider = ({children}) => {
     }
 
     useEffect(()=>{
+      if (!user?._id) {
+        handleLogoutOut()
+        return
+      }
+
       fetchCartItem()
-      handleLogoutOut()
       fetchAddress()
       fetchOrder()
     },[user])

@@ -1,9 +1,38 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import Axios from '../utils/Axios'
+import SummaryApi from '../common/SummaryApi'
+import AxiosToastError from '../utils/AxiosToastError'
 
 const Success = () => {
   const location = useLocation()
   const title = location?.state?.text ? location.state.text : "Payment"
+  const [syncing, setSyncing] = useState(false)
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const sessionId = params.get('session_id')
+
+    if (!sessionId) {
+      return
+    }
+
+    const confirmSession = async () => {
+      try {
+        setSyncing(true)
+        await Axios({
+          ...SummaryApi.confirmStripeSession,
+          data: { sessionId }
+        })
+      } catch (error) {
+        AxiosToastError(error)
+      } finally {
+        setSyncing(false)
+      }
+    }
+
+    confirmSession()
+  }, [location.search])
 
   return (
   <section className='min-h-[70vh] flex items-center justify-center bg-gradient-to-b from-green-50 via-white to-emerald-50 px-4'>
@@ -21,6 +50,9 @@ const Success = () => {
         Your payment is confirmed and your order is now being processed.
         We will notify you as soon as it is ready for dispatch.
       </p>
+      {syncing && (
+        <p className='mt-3 text-xs text-gray-500'>Syncing your order...</p>
+      )}
 
       <div className='mt-6 grid gap-3 sm:grid-cols-2'>
         <Link

@@ -63,7 +63,6 @@ function App() {
   }
 
 
-
   useEffect(() => {
     const initApp = async () => {
       const startTime = Date.now();

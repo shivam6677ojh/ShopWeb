@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { IoSearch } from "react-icons/io5";
+import React, { useEffect, useRef, useState } from 'react'
+import { IoMicOutline, IoSearch } from "react-icons/io5";
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { TypeAnimation } from 'react-type-animation';
 import { FaArrowLeft } from "react-icons/fa";
@@ -12,12 +12,60 @@ const Search = () => {
     const [isSearchPage,setIsSearchPage] = useState(false)
     const [ isMobile ] = useMobile()
     const params = useLocation()
-    const searchText = params.search.slice(3)
+    const [query, setQuery] = useState("")
+    const [isListening, setIsListening] = useState(false)
+    const recognitionRef = useRef(null)
+    const searchText = new URLSearchParams(params.search).get("q") || ""
+    const isSpeechSupported = typeof window !== "undefined" && (
+        "SpeechRecognition" in window || "webkitSpeechRecognition" in window
+    )
 
     useEffect(()=>{
         const isSearch = location.pathname === "/search"
         setIsSearchPage(isSearch)
     },[location])
+
+    useEffect(() => {
+        setQuery(searchText)
+    }, [searchText])
+
+    useEffect(() => {
+        if (!isSpeechSupported || recognitionRef.current) {
+            return
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+        const recognition = new SpeechRecognition()
+
+        recognition.continuous = false
+        recognition.interimResults = true
+        recognition.lang = "en-IN"
+
+        recognition.onresult = (event) => {
+            let transcript = ""
+            for (let i = event.resultIndex; i < event.results.length; i += 1) {
+                transcript += event.results[i][0].transcript
+            }
+
+            const nextQuery = transcript.trim()
+            setQuery(nextQuery)
+
+            const lastResult = event.results[event.results.length - 1]
+            if (lastResult?.isFinal && nextQuery) {
+                navigate(`/search?q=${encodeURIComponent(nextQuery)}`)
+            }
+        }
+
+        recognition.onerror = () => {
+            setIsListening(false)
+        }
+
+        recognition.onend = () => {
+            setIsListening(false)
+        }
+
+        recognitionRef.current = recognition
+    }, [isSpeechSupported, navigate])
 
 
     const redirectToSearchPage = ()=>{
@@ -26,8 +74,27 @@ const Search = () => {
 
     const handleOnChange = (e)=>{
         const value = e.target.value
-        const url = `/search?q=${value}`
+        setQuery(value)
+        const url = `/search?q=${encodeURIComponent(value)}`
         navigate(url)
+    }
+
+    const handleVoiceToggle = ()=>{
+        if (!isSpeechSupported) {
+            return
+        }
+
+        if (!isSearchPage) {
+            navigate("/search")
+        }
+
+        if (isListening) {
+            recognitionRef.current?.stop()
+            return
+        }
+
+        setIsListening(true)
+        recognitionRef.current?.start()
     }
 
   return (
@@ -83,13 +150,25 @@ const Search = () => {
                             type='text'
                             placeholder='Search for products...'
                             autoFocus
-                            defaultValue={searchText}
+                            value={query}
                             className='bg-transparent w-full h-full outline-none text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 px-4'
                             onChange={handleOnChange}
                         />
                     </div>
                 )
             }
+        </div>
+        <div>
+            <button
+                type="button"
+                onClick={handleVoiceToggle}
+                disabled={!isSpeechSupported}
+                aria-label={isListening ? "Stop voice search" : "Start voice search"}
+                className={`flex justify-center items-center h-full px-4 ${isListening ? "text-red-500" : "text-luxury-gold"} disabled:text-gray-400 disabled:cursor-not-allowed transition-all`}
+                title={isSpeechSupported ? "Voice search" : "Voice search not supported"}
+            >
+                <IoMicOutline size={22}/>
+            </button>
         </div>
         
     </div>

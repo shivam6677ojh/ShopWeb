@@ -224,3 +224,95 @@ export async function getOrderDetailsController(request,response){
         })
     }
 }
+
+export async function cancelOrderController(request, response) {
+    try {
+        const userId = request.userId
+        const { id } = request.params
+        const { reason } = request.body || {}
+
+        const order = await OrderModel.findOne({ _id: id, userId })
+
+        if (!order) {
+            return response.status(404).json({
+                message: "Order not found",
+                error: true,
+                success: false
+            })
+        }
+
+        if (order.order_status === "CANCELLED") {
+            return response.status(400).json({
+                message: "Order already cancelled",
+                error: true,
+                success: false
+            })
+        }
+
+        if (order.order_status === "DELIVERED") {
+            return response.status(400).json({
+                message: "Delivered order cannot be cancelled",
+                error: true,
+                success: false
+            })
+        }
+
+        order.order_status = "CANCELLED"
+        order.cancel_reason = reason || ""
+        order.canceled_at = new Date()
+
+        await order.save()
+
+        return response.json({
+            message: "Order cancelled",
+            error: false,
+            success: true,
+            data: order
+        })
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        })
+    }
+}
+
+export async function deleteOrderController(request, response) {
+    try {
+        const userId = request.userId
+        const { id } = request.params
+
+        const order = await OrderModel.findOne({ _id: id, userId })
+
+        if (!order) {
+            return response.status(404).json({
+                message: "Order not found",
+                error: true,
+                success: false
+            })
+        }
+
+        if (order.order_status !== "CANCELLED") {
+            return response.status(400).json({
+                message: "Only cancelled orders can be deleted",
+                error: true,
+                success: false
+            })
+        }
+
+        await OrderModel.deleteOne({ _id: id, userId })
+
+        return response.json({
+            message: "Order deleted",
+            error: false,
+            success: true
+        })
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        })
+    }
+}

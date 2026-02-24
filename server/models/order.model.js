@@ -42,6 +42,18 @@ const orderSchema = new mongoose.Schema({
         type : Number,
         default : 0
     },
+    order_status : {
+        type : String,
+        default : "PLACED"
+    },
+    cancel_reason : {
+        type : String,
+        default : ""
+    },
+    canceled_at : {
+        type : Date,
+        default : null
+    },
     invoice_receipt : {
         type : String,
         default : ""

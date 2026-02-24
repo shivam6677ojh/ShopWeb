@@ -153,6 +153,14 @@ const SummaryApi = {
         url : '/api/order/order-list',
         method : 'get'
     },
+    cancelOrder : {
+        url : '/api/order/cancel',
+        method : 'put'
+    },
+    deleteOrder : {
+        url : '/api/order/delete',
+        method : 'delete'
+    },
     adminDashboardStats : {
         url : '/api/admin/dashboard-stats',
         method : 'get'

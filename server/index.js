@@ -18,6 +18,7 @@ import orderRouter from './route/order.route.js'
 import adminRouter from './route/admin.route.js'
 
 const app = express()
+console.log(process.env.FRONTEND_URL);
 app.use(cors({
     credentials: true,
     origin: process.env.FRONTEND_URL || "http://localhost:5173" || "http://localhost:5174"
